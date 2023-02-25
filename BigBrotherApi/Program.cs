@@ -1,9 +1,9 @@
 using AutoMapper;
 using BigBrother.Helpers.MappingProfiles;
 using BigBrother.Interfaces;
+using BigBrother.Middlewares;
 using BigBrother.Services;
-using Microsoft.EntityFrameworkCore;
-using Repository;
+using NLog.Web;
 using Repository.Interfaces;
 using Repository.Services;
 
@@ -11,14 +11,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Logging.ClearProviders();
+builder.Host.UseNLog();
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContextPool<AppDbContext>(o => 
-    o.UseSqlite(builder.Configuration.GetConnectionString("Sqlite")));
-builder.Services.AddSingleton<IExamService, ExamService>();
 builder.Services.AddSingleton<IRepository, SqliteRepository>();
+builder.Services.AddSingleton<IExamService, ExamService>();
 
 var mappingConfig = new MapperConfiguration(mc =>
 {
@@ -36,10 +37,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<BbExceptionMiddleware>();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

@@ -4,15 +4,21 @@ namespace Repository.Interfaces;
 
 public interface IRepository
 {
-    public Task<User> GetUserAsync(Guid userId, AppDbContext context, CancellationToken cancellationToken);
+    public Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken);
 
-    public Task<Exam> GetExamAsync(Guid examId, AppDbContext context, CancellationToken cancellationToken);
+    public Task<User> GetUserByNameAsync(string userName, string userGroup, CancellationToken cancellationToken);
 
-    public Task<Guid> CreateUserAsync(User user, AppDbContext context, CancellationToken cancellationToken);
+    public bool UserWithNameExists(string userName, string userGroup);
 
-    public Task<Guid> CreateExamAsync(Exam exam, AppDbContext context, CancellationToken cancellationToken);
+    public Task<Exam> GetExamAsync(Guid examId, CancellationToken cancellationToken);
 
-    public Task<Guid> DeleteUserAsync(Guid userId, AppDbContext context, CancellationToken cancellationToken);
+    public Task<string?> GetExamLogAsync(Guid examId, CancellationToken cancellationToken);
 
-    public Task<Guid> DeleteExamAsync(Guid examId, AppDbContext context, CancellationToken cancellationToken);
+    public Task<Guid> CreateUserAsync(User user, CancellationToken cancellationToken);
+
+    public Task<Guid> CreateExamAsync(Exam exam, CancellationToken cancellationToken);
+
+    public Task<Guid> DeleteUserAsync(Guid userId, CancellationToken cancellationToken);
+
+    public Task<Guid> DeleteExamAsync(Guid examId, CancellationToken cancellationToken);
 }
