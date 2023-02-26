@@ -2,7 +2,7 @@
 
 public enum UserAction
 {
-    Backspace,
+    None,
     Copy,
     Cut,
     Delete,
@@ -15,6 +15,6 @@ public enum UserAction
     MoveCaretRight,
     MoveCaretUp,
     CompleteCode,
-    Running,
-    Building
+    Run,
+    Build
 }

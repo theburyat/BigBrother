@@ -1,4 +1,5 @@
-﻿using BigBrother.Interfaces;
+﻿using AutoMapper;
+using BigBrother.Interfaces;
 using Entities.Exceptions;
 using Entities.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -7,19 +8,21 @@ namespace BigBrother.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class ExamController: ControllerBase
+public class ExamsController: ControllerBase
 {
     private readonly IExamService _examService;
+    private readonly IMapper _mapper;
 
-    public ExamController(IExamService examService)
+    public ExamsController(IExamService examService, IMapper mapper)
     {
         _examService = examService;
+        _mapper = mapper;
     }
     
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Guid))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
-    public async Task<Guid> SaveExamLogAsync(
+    public async Task<Guid> SaveExamAsync(
         [FromQuery] string userName,
         [FromQuery] string userGroup,
         [FromForm] IFormFile logFile, 
@@ -34,38 +37,17 @@ public class ExamController: ControllerBase
         var examId = await _examService.SaveExamLogAsync(user, logFile, cancellationToken);
         return examId;
     }
-    
-    [HttpGet("users/{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
-    public async Task<UserModel> GetUserAsync(Guid id, CancellationToken cancellationToken)
-    {
-        var user = await _examService.GetUserAsync(id, cancellationToken);
-        return user;
-    }
-    
-    [HttpGet("users/find")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(UserModel))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
-    public async Task<UserModel> GetUserAsync(
-        [FromQuery] string userName, 
-        [FromQuery] string userGroup,
-        CancellationToken cancellationToken)
-    {
-        var user = await _examService.GetUserByNameAsync(userName, userGroup, cancellationToken);
-        return user;
-    }
 
-    [HttpGet("exams/{id}")]
+    [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ExamModel))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
     public async Task<ExamModel> GetExamAsync(Guid id, CancellationToken cancellationToken)
     {
         var exam = await _examService.GetExamAsync(id, cancellationToken);
-        return exam;
+        return _mapper.Map<ExamModel>(exam);
     }
     
-    [HttpGet("exams/log/{id}")]
+    [HttpGet("{id}/log")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
     public async Task<string> GetExamLogAsync(Guid id, CancellationToken cancellationToken)
@@ -74,16 +56,7 @@ public class ExamController: ControllerBase
         return examLog;
     }
 
-    [HttpDelete("users/{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Guid))]
-    [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
-    public async Task<Guid> DeleteUserAsync(Guid id, CancellationToken cancellationToken)
-    {
-        var userId = await _examService.DeleteUserAsync(id, cancellationToken);
-        return userId;
-    }
-    
-    [HttpDelete("exams/{id}")]
+    [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Guid))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
     public async Task<Guid> DeleteExamAsync(Guid id, CancellationToken cancellationToken)

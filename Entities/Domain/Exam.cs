@@ -8,8 +8,6 @@ public class Exam
 
     public DateTime Date { get; set; }
 
-    public int BackspaceCount { get; set; }
-    
     public int CopyCount { get; set; }
     
     public int CutCount { get; set; }
