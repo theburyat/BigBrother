@@ -136,7 +136,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
             {
                 foreach (var userAction in committedActions.Keys)
                 {
-                    if (actionsWeights.ContainsKey(userAction))
+                    if (!actionsWeights.ContainsKey(userAction))
                     {
                         actionsWeights[userAction] = 0;
                     }
@@ -194,9 +194,9 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
             {
                 var difference = boxCoxDistribution[userAction] - meansDistribution[userAction];
                 var standardDeviation = standardDeviationDistribution[userAction];
-                var outlierScore = -standardDeviation < difference && difference < standardDeviation
+                var outlierScore = -standardDeviation <= difference && difference <= standardDeviation
                     ? 0
-                    : 1 - GetPraw(boxCoxDistribution[userAction], userAction, meansDistribution) / NormalizationValue;
+                    : (1 - GetPraw(boxCoxDistribution[userAction], userAction, meansDistribution)) / NormalizationValue;
 
                 unweightedOutlierScore.Add(userAction, outlierScore);
             }
