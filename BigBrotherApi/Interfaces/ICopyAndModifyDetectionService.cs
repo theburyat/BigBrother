@@ -2,5 +2,5 @@
 
 public interface ICopyAndModifyDetectionService
 {
-    public IDictionary<Tuple<Guid, Guid>, double> DetectCopyAndModify(string group, DateTime dateTime);
+    public Task<IDictionary<Tuple<Guid, Guid>, double>> DetectCopyAndModify(string group, DateTime dateTime);
 }

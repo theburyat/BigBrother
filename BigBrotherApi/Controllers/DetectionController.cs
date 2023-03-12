@@ -23,10 +23,10 @@ public class DetectionController
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(string))]
     [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(BbException))]
-    public Task<string> RunAnalysisAsync(CancellationToken cancellationToken)
+    public async Task<string> RunAnalysisAsync(CancellationToken cancellationToken)
     {
-        var x = _copyAndModifyDetectionService.DetectCopyAndModify("353", DateTime.Today);
-        var xx = _generationFromScratchDetectionService.DetectGenerationFromScratchAsync("353", DateTime.Today, cancellationToken); 
+        var x = await _copyAndModifyDetectionService.DetectCopyAndModify("353", DateTime.Today);
+        var xx = await _generationFromScratchDetectionService.DetectGenerationFromScratchAsync("353", DateTime.Today, cancellationToken); 
         
         var y = new StringBuilder();
 
@@ -35,6 +35,6 @@ public class DetectionController
             y.AppendLine($"correlation between {z.Item1} and {z.Item2} is: {x[z]}");
         }
 
-        return Task.FromResult(y.ToString());
+        return y.ToString();
     }
 }

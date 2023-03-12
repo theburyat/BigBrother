@@ -26,7 +26,7 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         _logger = logger;
     }
     
-    public IDictionary<Tuple<Guid, Guid>, double> DetectCopyAndModify(string group, DateTime dateTime)
+    public async Task<IDictionary<Tuple<Guid, Guid>, double>> DetectCopyAndModify(string group, DateTime dateTime)
     {
         var usersForDetection = _userService.GetUsersFromGroup(group);
 
@@ -43,7 +43,7 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         {
             for (var j = i + 1; j < exams.Count; j++)
             {
-                var correlation = DetectCopyAndModifyInPair(exams[i], exams[j]);
+                var correlation = await DetectCopyAndModifyInPairAsync(exams[i], exams[j]);
                 _logger.LogInformation($"Correlation between exams {exams[i].Id} and {exams[j].Id} is: {correlation}");
                 
                 detectionsResults.Add(new Tuple<Guid, Guid>(exams[i].Id, exams[j].Id), correlation);
@@ -53,38 +53,44 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         return detectionsResults;
     }
 
-    private double DetectCopyAndModifyInPair(Exam exam1, Exam exam2)
+    private async Task<double> DetectCopyAndModifyInPairAsync(Exam exam1, Exam exam2)
     {
         var actionStatistic1 = exam1.GetCommittedActions();
         var actionStatistic2 = exam2.GetCommittedActions();
 
         var correlations = new List<double>();
 
-        for (var i = 0; i < SubsetAnalysisInPairCount; i++)
+        for (var i = 0; i < SubsetAnalysisInPairCount; i++) //TODO() work in parallel
         {
-            var correlation = MakeAnalysisForRandomActionsSubset(actionStatistic1, actionStatistic2);
+            var correlation = await MakeAnalysisForRandomActionsSubsetAsync(actionStatistic1, actionStatistic2);
             correlations.Add(correlation);
         }
 
         return correlations.Max();
     }
 
-    private double MakeAnalysisForRandomActionsSubset(
+    private async Task<double> MakeAnalysisForRandomActionsSubsetAsync(
         IDictionary<UserAction, int> actionStatistic1,
         IDictionary<UserAction, int> actionStatistic2)
     {
-        var actionsSet = GetActionSetForAnalyse(actionStatistic1, actionStatistic2);
-        if (actionsSet.Count == 0)
+        double numerator = default;
+        double denominator = default;
+        
+        await Task.Run(() =>
         {
-            throw new BbException(ErrorCode.TOO_FEW_ACTIONS, $"To few actions for analysis: {actionsSet.Count}");
-        }
+            var actionsSet = GetActionSetForAnalyse(actionStatistic1, actionStatistic2);
+            if (actionsSet.Count == 0)
+            {
+                throw new BbException(ErrorCode.TOO_FEW_ACTIONS, $"To few actions for analysis: {actionsSet.Count}");
+            }
 
-        var quotient1 = GetQuotient(actionsSet, actionStatistic1);
-        var quotient2 = GetQuotient(actionsSet, actionStatistic2);
+            var quotient1 = GetQuotient(actionsSet, actionStatistic1);
+            var quotient2 = GetQuotient(actionsSet, actionStatistic2);
 
-        var numerator = GetNumerator(actionsSet, actionStatistic1, actionStatistic2, quotient1, quotient2);
-        var denominator = GetDenominatorPartForExam(actionsSet, actionStatistic1, quotient1) *
+            numerator = GetNumerator(actionsSet, actionStatistic1, actionStatistic2, quotient1, quotient2);
+            denominator = GetDenominatorPartForExam(actionsSet, actionStatistic1, quotient1) *
                           GetDenominatorPartForExam(actionsSet, actionStatistic2, quotient2);
+        });
 
         return numerator / denominator;
     }
