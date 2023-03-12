@@ -13,7 +13,7 @@ public interface IUserService
     
     public Task<User> GetUserByNameAsync(string userName, string userGroup, CancellationToken cancellationToken);
 
-    public IEnumerable<User> GetUsersFromGroup(string userGroup);
+    public IReadOnlyCollection<User> GetUsersFromGroup(string userGroup);
 
     public bool UserWithNameExists(string userName, string userGroup);
     

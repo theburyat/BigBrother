@@ -58,7 +58,7 @@ public class UserService: IUserService
         return user;
     }
 
-    public IEnumerable<User> GetUsersFromGroup(string userGroup)
+    public IReadOnlyCollection<User> GetUsersFromGroup(string userGroup)
     {
         return _userRepository.GetUsersFromGroup(userGroup);
     }

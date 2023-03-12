@@ -1,4 +1,5 @@
-﻿using BigBrother.Interfaces;
+﻿using BigBrother.Extensions;
+using BigBrother.Interfaces;
 using Entities.Domain;
 using Entities.Enums;
 using Entities.Exceptions;
@@ -29,7 +30,7 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
     {
         var usersForDetection = _userService.GetUsersFromGroup(group);
 
-        var exams = usersForDetection.Select(user => GetUserExamAtDate(user, dateTime)).ToList();
+        var exams = usersForDetection.Select(user => _examService.GetUserExamAtDate(user, dateTime)).ToList();
 
         if (exams.Count < 2)
         {
@@ -52,29 +53,10 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         return detectionsResults;
     }
 
-    private Exam GetUserExamAtDate(User user, DateTime dateTime)
-    {
-        var userExams = _examService.GetUserExams(user.Id).ToArray();
-        if (userExams.Length == 0)
-        {
-            throw new BbException(ErrorCode.TOO_FEW_EXAMS, 
-                $"User {user.Name} from group {user.Group} with id {user.Id} has no exams");
-        }
-
-        var desiredExam = userExams.LastOrDefault(x => x.Date.Date == dateTime.Date);
-        if (desiredExam is null)
-        {
-            throw new BbException(ErrorCode.EXAM_NOT_FOUND,
-                $"User {user.Name} from group {user.Group} with id {user.Id} has no exams at the date {dateTime}");
-        }
-
-        return desiredExam;
-    }
-
     private double DetectCopyAndModifyInPair(Exam exam1, Exam exam2)
     {
-        var actionStatistic1 = GetCommittedActions(exam1);
-        var actionStatistic2 = GetCommittedActions(exam2);
+        var actionStatistic1 = exam1.GetCommittedActions();
+        var actionStatistic2 = exam2.GetCommittedActions();
 
         var correlations = new List<double>();
 
@@ -87,27 +69,6 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         return correlations.Max();
     }
 
-    private IDictionary<UserAction, int> GetCommittedActions(Exam exam)
-    {
-        return new Dictionary<UserAction, int>
-        {
-            { UserAction.Copy, exam.CopyCount },
-            { UserAction.Cut, exam.CutCount },
-            { UserAction.Delete, exam.DeleteCount },
-            { UserAction.Enter, exam.EnterCount },
-            { UserAction.Select, exam.SelectCount },
-            { UserAction.Paste, exam.PasteCount },
-            { UserAction.Type, exam.TypeCount },
-            { UserAction.MoveCaretDown, exam.MoveCaretDownCount },
-            { UserAction.MoveCaretLeft, exam.MoveCaretLeftCount },
-            { UserAction.MoveCaretRight, exam.MoveCaretRightCount },
-            { UserAction.MoveCaretUp, exam.MoveCaretUpCount },
-            { UserAction.CompleteCode, exam.CodeCompletionCount },
-            { UserAction.Run, exam.RunningCount },
-            { UserAction.Build, exam.BuildingCount }
-        };
-    }
-    
     private double MakeAnalysisForRandomActionsSubset(
         IDictionary<UserAction, int> actionStatistic1,
         IDictionary<UserAction, int> actionStatistic2)

@@ -34,11 +34,11 @@ public class ExamRepository: IExamRepository
         }
     }
 
-    public IEnumerable<Exam> GetUserExams(Guid userId)
+    public IReadOnlyCollection<Exam> GetUserExams(Guid userId)
     {
         using (var context = new AppDbContext())
         {
-            return _mapper.Map<IEnumerable<Exam>>(context.ExamEntities.Where(x => x.UserId == userId));
+            return _mapper.Map<IReadOnlyCollection<Exam>>(context.ExamEntities.Where(x => x.UserId == userId));
         }
     }
 

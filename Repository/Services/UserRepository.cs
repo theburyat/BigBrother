@@ -43,11 +43,11 @@ public class UserRepository: IUserRepository
         }
     }
 
-    public IEnumerable<User> GetUsersFromGroup(string userGroup)
+    public IReadOnlyCollection<User> GetUsersFromGroup(string userGroup)
     {
         using (var context = new AppDbContext())
         {
-            return _mapper.Map<IEnumerable<User>>(context.UserEntities.Where(x => x.Group == userGroup));
+            return _mapper.Map<IReadOnlyCollection<User>>(context.UserEntities.Where(x => x.Group == userGroup));
         }
     }
 

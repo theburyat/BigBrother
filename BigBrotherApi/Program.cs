@@ -23,6 +23,7 @@ builder.Services.AddSingleton<IExamRepository, ExamRepository>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IExamService, ExamService>();
 builder.Services.AddSingleton<ICopyAndModifyDetectionService, CopyAndModifyDetectionService>();
+builder.Services.AddSingleton<IGenerationFromScratchDetectionService, GenerationFromScratchDetectionService>();
 
 var mappingConfig = new MapperConfiguration(mc =>
 {

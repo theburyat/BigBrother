@@ -8,7 +8,7 @@ public interface IExamRepository
     
     public Task<Exam> GetExamAsync(Guid examId, CancellationToken cancellationToken);
 
-    public IEnumerable<Exam> GetUserExams(Guid userId);
+    public IReadOnlyCollection<Exam> GetUserExams(Guid userId);
 
     public Task<Guid> DeleteExamAsync(Guid examId, CancellationToken cancellationToken);
 }

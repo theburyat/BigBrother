@@ -13,8 +13,10 @@ public interface IExamService
     public Task<Exam> GetExamAsync(Guid examId, CancellationToken cancellationToken);
     
     public Task<string> GetExamLogAsync(Guid examId, CancellationToken cancellationToken);
+
+    public Exam GetUserExamAtDate(User user, DateTime dateTime);
     
-    public IEnumerable<Exam> GetUserExams(Guid userId);
+    public IReadOnlyCollection<Exam> GetUserExams(Guid userId);
 
     public Task<Guid> DeleteExamAsync(Guid examId, CancellationToken cancellationToken);
 }
