@@ -15,8 +15,6 @@ public interface IExamService
     public Task<string> GetExamLogAsync(Guid examId, CancellationToken cancellationToken);
 
     public Exam GetUserExamAtDate(User user, DateTime dateTime);
-    
-    public IReadOnlyCollection<Exam> GetUserExams(Guid userId);
 
     public Task<Guid> DeleteExamAsync(Guid examId, CancellationToken cancellationToken);
 }

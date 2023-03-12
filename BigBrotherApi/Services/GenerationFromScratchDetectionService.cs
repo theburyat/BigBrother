@@ -30,6 +30,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
         
         var usersForDetection = _userService.GetUsersFromGroup(group);
         var exams = usersForDetection.Select(user => _examService.GetUserExamAtDate(user, dateTime)).ToList();
+        
         if (exams.Count < 2)
         {
             throw new BbException(ErrorCode.TOO_FEW_EXAMS, $"Exams count: {exams.Count}");

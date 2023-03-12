@@ -86,7 +86,7 @@ public class ExamService : IExamService
         return desiredExam;
     }
 
-    public IReadOnlyCollection<Exam> GetUserExams(Guid userId)
+    private IReadOnlyCollection<Exam> GetUserExams(Guid userId)
     {
         return _examRepository.GetUserExams(userId);
     }

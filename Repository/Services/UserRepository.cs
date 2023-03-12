@@ -35,7 +35,7 @@ public class UserRepository: IUserRepository
         }
     }
 
-    public async Task<User> GetUserByNameAsync(string userName, string userGroup, CancellationToken cancellationToken)
+    public async Task<User> GetUserByNameAndGroupAsync(string userName, string userGroup, CancellationToken cancellationToken)
     {
         using (var context = new AppDbContext())
         {
@@ -51,7 +51,7 @@ public class UserRepository: IUserRepository
         }
     }
 
-    public bool UserWithNameExists(string userName, string userGroup)
+    public bool UserWithNameFromGroupExists(string userName, string userGroup)
     {
         using (var context = new AppDbContext())
         {

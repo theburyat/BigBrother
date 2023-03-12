@@ -21,19 +21,24 @@ public class UserService: IUserService
         _logger = logger;
     }
 
-    public async Task<Guid> CreateUserAsync(CreateUserModel userModel, CancellationToken cancellationToken)
-    {
-        var user = _mapper.Map<User>(userModel);
-        user.Id = Guid.NewGuid();
-
-        return await _userRepository.CreateUserAsync(user, cancellationToken);
-    }
-
     public async Task<Guid> GetUserIdByNameWithCreationIfNotExistAsync(CreateUserModel userModel, CancellationToken cancellationToken)
     {
         return UserWithNameExists(userModel.Name, userModel.Group)
             ? (await GetUserByNameAsync(userModel.Name, userModel.Group, cancellationToken)).Id
             : await CreateUserAsync(userModel, cancellationToken);
+    }
+    
+    private bool UserWithNameExists(string userName, string userGroup)
+    {
+        return _userRepository.UserWithNameFromGroupExists(userName, userGroup);
+    }
+    
+    private async Task<Guid> CreateUserAsync(CreateUserModel userModel, CancellationToken cancellationToken)
+    {
+        var user = _mapper.Map<User>(userModel);
+        user.Id = Guid.NewGuid();
+
+        return await _userRepository.CreateUserAsync(user, cancellationToken);
     }
 
     public async Task<User> GetUserAsync(Guid userId, CancellationToken cancellationToken)
@@ -49,7 +54,7 @@ public class UserService: IUserService
 
     public async Task<User> GetUserByNameAsync(string userName, string userGroup, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetUserByNameAsync(userName, userGroup, cancellationToken);
+        var user = await _userRepository.GetUserByNameAndGroupAsync(userName, userGroup, cancellationToken);
         if (user is null)
         {
             throw new BbException(ErrorCode.USER_NOT_FOUND, $"User with name {userName} from group {userGroup} not found");
@@ -61,12 +66,6 @@ public class UserService: IUserService
     public IReadOnlyCollection<User> GetUsersFromGroup(string userGroup)
     {
         return _userRepository.GetUsersFromGroup(userGroup);
-    }
-
-
-    public bool UserWithNameExists(string userName, string userGroup)
-    {
-        return _userRepository.UserWithNameExists(userName, userGroup);
     }
 
     public async Task<Guid> DeleteUserAsync(Guid userId, CancellationToken cancellationToken)

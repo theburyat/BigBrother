@@ -1,5 +1,3 @@
-using System.Collections;
-
 namespace BigBrother.Interfaces;
 
 public interface IGenerationFromScratchDetectionService
