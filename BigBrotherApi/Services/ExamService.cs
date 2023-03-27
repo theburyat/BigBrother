@@ -67,20 +67,19 @@ public class ExamService : IExamService
         return exam.ActionsLog;
     }
 
-    public Exam GetUserExamAtDate(User user, DateTime dateTime)
+    public Exam? GetUserExamAtDate(User user, DateTime dateTime)
     {
         var userExams = GetUserExams(user.Id).ToArray();
         if (userExams.Length == 0)
         {
-            throw new BbException(ErrorCode.TOO_FEW_EXAMS, 
+            throw new BbException(ErrorCode.NO_EXAMS, 
                 $"User {user.Name} from group {user.Group} with id {user.Id} has no exams");
         }
 
         var desiredExam = userExams.LastOrDefault(x => x.Date.Date == dateTime.Date);
         if (desiredExam is null)
         {
-            throw new BbException(ErrorCode.EXAM_NOT_FOUND,
-                $"User {user.Name} from group {user.Group} with id {user.Id} has no exams at the date {dateTime}");
+            _logger.LogWarning($"User {user.Name} from group {user.Group} with id {user.Id} has no exams at the date {dateTime}");
         }
 
         return desiredExam;

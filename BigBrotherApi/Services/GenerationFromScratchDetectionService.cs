@@ -1,5 +1,6 @@
 using BigBrother.Extensions;
 using BigBrother.Interfaces;
+using Entities.Domain;
 using Entities.Enums;
 using Entities.Exceptions;
 
@@ -10,32 +11,23 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
     private const int MaxActionsCount = Int32.MaxValue;
     private const double NormalizationValue = 0.16;
 
-    private readonly IUserService _userService;
-    private readonly IExamService _examService;
     private readonly ILogger<GenerationFromScratchDetectionService> _logger;
 
-    public GenerationFromScratchDetectionService(
-        IUserService userService, 
-        IExamService examService,
-        ILogger<GenerationFromScratchDetectionService> logger)
+    public GenerationFromScratchDetectionService(ILogger<GenerationFromScratchDetectionService> logger)
     {
-        _userService = userService;
-        _examService = examService;
         _logger = logger;
     }
     
-    public async Task<IDictionary<Guid, double>> DetectGenerationFromScratchAsync(string group, DateTime dateTime, CancellationToken cancellationToken)
+    public async Task<IDictionary<Guid, double>> DetectGenerationFromScratchAsync(List<Exam> exams, CancellationToken cancellationToken)
     {
-        var outlierScores = new Dictionary<Guid, double>() as IDictionary<Guid, double>;
-        
-        var usersForDetection = _userService.GetUsersFromGroup(group);
-        var exams = usersForDetection.Select(user => _examService.GetUserExamAtDate(user, dateTime)).ToList();
-        
         if (exams.Count < 2)
         {
             throw new BbException(ErrorCode.TOO_FEW_EXAMS, $"Exams count: {exams.Count}");
         }
 
+        
+        var outlierScores = new Dictionary<Guid, double>() as IDictionary<Guid, double>;
+        
         var committedActionsForExams = exams
             .Select(x => x.GetCommittedActions())
             .ToArray();

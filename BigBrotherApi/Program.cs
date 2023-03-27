@@ -24,6 +24,7 @@ builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IExamService, ExamService>();
 builder.Services.AddSingleton<ICopyAndModifyDetectionService, CopyAndModifyDetectionService>();
 builder.Services.AddSingleton<IGenerationFromScratchDetectionService, GenerationFromScratchDetectionService>();
+builder.Services.AddSingleton<IDetectionService, DetectionService>();
 
 var mappingConfig = new MapperConfiguration(mc =>
 {

@@ -12,26 +12,15 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
     
     private readonly Random _random = new ();
     
-    private readonly IUserService _userService;
-    private readonly IExamService _examService;
     private readonly ILogger<CopyAndModifyDetectionService> _logger;
 
-    public CopyAndModifyDetectionService(
-        IUserService userService, 
-        IExamService examService, 
-        ILogger<CopyAndModifyDetectionService> logger)
+    public CopyAndModifyDetectionService(ILogger<CopyAndModifyDetectionService> logger)
     {
-        _userService = userService;
-        _examService = examService;
         _logger = logger;
     }
     
-    public async Task<IDictionary<Tuple<Guid, Guid>, double>> DetectCopyAndModify(string group, DateTime dateTime)
+    public async Task<IDictionary<Tuple<Guid, Guid>, double>> DetectCopyAndModifyAsync(List<Exam> exams, CancellationToken cancellationToken)
     {
-        var usersForDetection = _userService.GetUsersFromGroup(group);
-
-        var exams = usersForDetection.Select(user => _examService.GetUserExamAtDate(user, dateTime)).ToList();
-
         if (exams.Count < 2)
         {
             throw new BbException(ErrorCode.TOO_FEW_EXAMS, $"Exams count: {exams.Count}");
@@ -43,7 +32,7 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         {
             for (var j = i + 1; j < exams.Count; j++)
             {
-                var correlation = await DetectCopyAndModifyInPairAsync(exams[i], exams[j]);
+                var correlation = await DetectCopyAndModifyInPairAsync(exams[i], exams[j], cancellationToken);
                 _logger.LogInformation($"Correlation between exams {exams[i].Id} and {exams[j].Id} is: {correlation}");
                 
                 detectionsResults.Add(new Tuple<Guid, Guid>(exams[i].Id, exams[j].Id), correlation);
@@ -53,16 +42,16 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
         return detectionsResults;
     }
 
-    private async Task<double> DetectCopyAndModifyInPairAsync(Exam exam1, Exam exam2)
+    private async Task<double> DetectCopyAndModifyInPairAsync(Exam exam1, Exam exam2, CancellationToken cancellationToken)
     {
-        var actionStatistic1 = exam1.GetCommittedActions();
-        var actionStatistic2 = exam2.GetCommittedActions();
+        var actionStatistic1 = exam1.GetCommittedActions(addTypeAction: false);
+        var actionStatistic2 = exam2.GetCommittedActions(addTypeAction: false);
 
         var correlations = new List<double>();
 
-        for (var i = 0; i < SubsetAnalysisInPairCount; i++) //TODO() work in parallel
+        for (var i = 0; i < SubsetAnalysisInPairCount; i++)
         {
-            var correlation = await MakeAnalysisForRandomActionsSubsetAsync(actionStatistic1, actionStatistic2);
+            var correlation = await MakeAnalysisForRandomActionsSubsetAsync(actionStatistic1, actionStatistic2, cancellationToken);
             correlations.Add(correlation);
         }
 
@@ -71,7 +60,8 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
 
     private async Task<double> MakeAnalysisForRandomActionsSubsetAsync(
         IDictionary<UserAction, int> actionStatistic1,
-        IDictionary<UserAction, int> actionStatistic2)
+        IDictionary<UserAction, int> actionStatistic2,
+        CancellationToken cancellationToken)
     {
         double numerator = default;
         double denominator = default;
@@ -90,7 +80,7 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
             numerator = GetNumerator(actionsSet, actionStatistic1, actionStatistic2, quotient1, quotient2);
             denominator = GetDenominatorPartForExam(actionsSet, actionStatistic1, quotient1) *
                           GetDenominatorPartForExam(actionsSet, actionStatistic2, quotient2);
-        });
+        }, cancellationToken);
 
         return numerator / denominator;
     }
