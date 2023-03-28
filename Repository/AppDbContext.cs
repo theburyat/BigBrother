@@ -9,14 +9,9 @@ public sealed class AppDbContext: DbContext
 
     public DbSet<ExamEntity> ExamEntities { get; set; }
 
-    public AppDbContext()
+    public AppDbContext(DbContextOptions<AppDbContext> options): base(options)
     {
         Database.EnsureCreated();
-    }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlite("Data Source=bigbrother.db");
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
