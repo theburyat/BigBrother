@@ -8,7 +8,7 @@ namespace BigBrother.Services;
 
 public class GenerationFromScratchDetectionService: IGenerationFromScratchDetectionService
 {
-    private const int MaxActionsCount = Int32.MaxValue;
+    private const int MaxActionsCount = 2000;
     private const double NormalizationValue = 0.16;
 
     private readonly ILogger<GenerationFromScratchDetectionService> _logger;
@@ -200,7 +200,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
     private double GetPraw(double boxCoxActionValue, UserAction userAction, IDictionary<UserAction, double> meansDistributions)
     {
         return boxCoxActionValue > meansDistributions[userAction]
-            ? boxCoxActionValue / MaxActionsCount
-            : 1 - boxCoxActionValue / MaxActionsCount;
+            ? 1 - boxCoxActionValue / MaxActionsCount
+            : boxCoxActionValue / MaxActionsCount;
     }
 }

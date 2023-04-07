@@ -5,7 +5,7 @@ namespace BigBrother.Extensions;
 
 public static class ExamExtensions
 {
-    public static IDictionary<UserAction, int> GetCommittedActions(this Exam exam, bool addTypeAction = true)
+    public static IDictionary<UserAction, int> GetCommittedActions(this Exam exam)
     {
         var result =  new Dictionary<UserAction, int>
         {
@@ -20,14 +20,10 @@ public static class ExamExtensions
             { UserAction.MoveCaretRight, exam.MoveCaretRightCount },
             { UserAction.MoveCaretUp, exam.MoveCaretUpCount },
             { UserAction.CompleteCode, exam.CodeCompletionCount },
+            { UserAction.Type, exam.TypeCount },
             { UserAction.Run, exam.RunningCount },
             { UserAction.Build, exam.BuildingCount }
         };
-
-        if (addTypeAction)
-        {
-            result.Add(UserAction.Type, exam.TypeCount);
-        }
 
         return result;
     }

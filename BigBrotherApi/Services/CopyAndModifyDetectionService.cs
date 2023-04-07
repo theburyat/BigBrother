@@ -44,8 +44,8 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
 
     private async Task<double> DetectCopyAndModifyInPairAsync(Exam exam1, Exam exam2, CancellationToken cancellationToken)
     {
-        var actionStatistic1 = exam1.GetCommittedActions(addTypeAction: false);
-        var actionStatistic2 = exam2.GetCommittedActions(addTypeAction: false);
+        var actionStatistic1 = exam1.GetCommittedActions();
+        var actionStatistic2 = exam2.GetCommittedActions();
 
         var correlations = new List<double>();
 
@@ -147,7 +147,7 @@ public class CopyAndModifyDetectionService: ICopyAndModifyDetectionService
 
         foreach (var action in actionSet)
         {
-            result += (actionStatistic1[action] - quotient1) * (actionStatistic2[action] - quotient2);
+            result += Math.Abs(actionStatistic1[action] - quotient1) * Math.Abs(actionStatistic2[action] - quotient2);
         }
 
         return result;
