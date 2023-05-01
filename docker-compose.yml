@@ -1,0 +1,21 @@
+﻿version: "3.9"
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_DB: "big_brother_eye"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      PG_DATA: "/var/lib/postgresql/bigbrother_data/"
+    volumes:
+      - ./dev/pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+  bigbrother:
+    image: theburyat/bigbrother
+    container_name: bigbrother
+    ports:
+      - "7120:80"
+    links:
+      - "postgres:postgres"
