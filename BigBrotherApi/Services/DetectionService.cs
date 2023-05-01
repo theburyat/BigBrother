@@ -10,18 +10,15 @@ public class DetectionService: IDetectionService
 {
     private readonly IExamService _examService;
     private readonly IUserService _userService;
-    private readonly ICopyAndModifyDetectionService _copyAndModifyDetectionService;
     private readonly IGenerationFromScratchDetectionService _generationFromScratchDetectionService;
     
     public DetectionService(
         IExamService examService,
         IUserService userService,
-        ICopyAndModifyDetectionService copyAndModifyDetectionService, 
         IGenerationFromScratchDetectionService generationFromScratchDetectionService)
     {
         _examService = examService;
         _userService = userService;
-        _copyAndModifyDetectionService = copyAndModifyDetectionService;
         _generationFromScratchDetectionService = generationFromScratchDetectionService;
     }
 
@@ -45,41 +42,17 @@ public class DetectionService: IDetectionService
             }
         }
         
-        var copyAndModifyDetectionResult = 
-            await _copyAndModifyDetectionService.DetectCopyAndModifyAsync(exams, cancellationToken);
         var generationFromScratchDetectionResult = 
             await _generationFromScratchDetectionService.DetectGenerationFromScratchAsync(exams, cancellationToken); 
         
         var stringBuilder = new StringBuilder();
 
-        var normalizedCopyAndModifyDetectionResult = 
-            await GetHumanReadableCopyAndModifyDetectionResultAsync(copyAndModifyDetectionResult, cancellationToken);
         var normalizedGenerationFromScratchDetectionResult =
-            await GetHumanReadableGenerationFromScratchDetectionResultAsync(generationFromScratchDetectionResult,
-                cancellationToken);
+            await GetHumanReadableGenerationFromScratchDetectionResultAsync(generationFromScratchDetectionResult, cancellationToken);
 
-        stringBuilder
-            .Append(normalizedCopyAndModifyDetectionResult)
-            .AppendLine()
-            .Append(normalizedGenerationFromScratchDetectionResult);
+        stringBuilder.Append(normalizedGenerationFromScratchDetectionResult);
         
         return stringBuilder.ToString();
-    }
-
-    private async Task<StringBuilder> GetHumanReadableCopyAndModifyDetectionResultAsync(IDictionary<Tuple<Guid,Guid>,double> detectionResult, CancellationToken cancellationToken)
-    {
-        var stringBuilder = new StringBuilder("Copy & Modify detection result").AppendLine();
-        var sortedResult = detectionResult.OrderBy(x => x.Value);
-
-        foreach (var entry in sortedResult)
-        {
-            var firstUserName = await GetUserNameByExamIdAsync(entry.Key.Item1, cancellationToken);
-            var secondUserName = await GetUserNameByExamIdAsync(entry.Key.Item2, cancellationToken);
-
-            stringBuilder.AppendLine($"Correlation between {firstUserName} && {secondUserName} is {entry.Value}");
-        }
-
-        return stringBuilder;
     }
 
     private async Task<StringBuilder> GetHumanReadableGenerationFromScratchDetectionResultAsync(IDictionary<Guid, double> detectionResult, CancellationToken cancellationToken)
@@ -91,7 +64,7 @@ public class DetectionService: IDetectionService
         {
             var userName = await GetUserNameByExamIdAsync(entry.Key, cancellationToken);
 
-            stringBuilder.AppendLine($"Total outlier score for user {userName} is {entry.Value}");
+            stringBuilder.AppendLine($"Total outlier score for user {userName} is {Math.Round(entry.Value, 2)}");
         }
 
         return stringBuilder;

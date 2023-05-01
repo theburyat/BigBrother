@@ -8,9 +8,8 @@ namespace BigBrother.Services;
 
 public class GenerationFromScratchDetectionService: IGenerationFromScratchDetectionService
 {
-    private const int MaxActionsCount = 2000;
     private const double NormalizationValue = 0.16;
-
+    
     private readonly ILogger<GenerationFromScratchDetectionService> _logger;
 
     public GenerationFromScratchDetectionService(ILogger<GenerationFromScratchDetectionService> logger)
@@ -25,7 +24,6 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
             throw new BbException(ErrorCode.TOO_FEW_EXAMS, $"Exams count: {exams.Count}");
         }
 
-        
         var outlierScores = new Dictionary<Guid, double>() as IDictionary<Guid, double>;
         
         var committedActionsForExams = exams
@@ -34,6 +32,9 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
         var boxCoxDistributions = committedActionsForExams
             .Select(x => x.TransformToBoxCoxDistribution())
             .ToArray();
+        var maxActionsCount = committedActionsForExams
+            .SelectMany(x => x.Values)
+            .Max();
 
         var meansFromBoxCoxDistributions = await GetMeansFromBoxCoxDistributionsAsync(boxCoxDistributions, cancellationToken);
         var standardDeviationsFromBoxCoxDistributions = await GetStandardDeviationsFromBoxCoxDistributionAsync(boxCoxDistributions, meansFromBoxCoxDistributions, cancellationToken);
@@ -46,6 +47,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
                 meansFromBoxCoxDistributions,
                 standardDeviationsFromBoxCoxDistributions, 
                 actionWeights,
+                maxActionsCount,
                 cancellationToken);
             
             outlierScores.Add(exam.Id, examOutlierScore);
@@ -54,7 +56,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
 
         return outlierScores;
     }
-    
+
     private async Task<IDictionary<UserAction, double>> GetMeansFromBoxCoxDistributionsAsync(
         IReadOnlyCollection<IDictionary<UserAction, double>> boxCoxExamDistributions, 
         CancellationToken cancellationToken)
@@ -150,6 +152,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
         IDictionary<UserAction, double> meansFromBoxCoxDistributions,
         IDictionary<UserAction, double> standardDeviationsFromBoxCoxDistributions,
         IDictionary<UserAction, double> actionWeights,
+        int maxActionsCount,
         CancellationToken cancellationToken)
     {
         double numerator = 0;
@@ -160,7 +163,8 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
         var unweightedOutlierScore = await GetUnweightedOutlierScoreForActionsInExamAsync(
             boxCoxDistribution, 
             meansFromBoxCoxDistributions, 
-            standardDeviationsFromBoxCoxDistributions, 
+            standardDeviationsFromBoxCoxDistributions,
+            maxActionsCount,
             cancellationToken);
         
         foreach (var userAction in committedActionsInExam.Keys)
@@ -175,7 +179,8 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
     private async Task<IDictionary<UserAction, double>> GetUnweightedOutlierScoreForActionsInExamAsync(
         IDictionary<UserAction, double> boxCoxDistribution,
         IDictionary<UserAction, double> meansDistribution,
-        IDictionary<UserAction, double> standardDeviationDistribution, 
+        IDictionary<UserAction, double> standardDeviationDistribution,
+        int maxActionsCount,
         CancellationToken cancellationToken)
     {
         var unweightedOutlierScore = new Dictionary<UserAction, double>();
@@ -188,7 +193,7 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
                 var standardDeviation = standardDeviationDistribution[userAction];
                 var outlierScore = -standardDeviation <= difference && difference <= standardDeviation
                     ? 0
-                    : (1 - GetPraw(boxCoxDistribution[userAction], userAction, meansDistribution)) / NormalizationValue;
+                    : (1 - GetPraw(boxCoxDistribution[userAction], userAction, meansDistribution, maxActionsCount)) / NormalizationValue;
 
                 unweightedOutlierScore.Add(userAction, outlierScore);
             }
@@ -197,10 +202,14 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
         return unweightedOutlierScore;
     }
     
-    private double GetPraw(double boxCoxActionValue, UserAction userAction, IDictionary<UserAction, double> meansDistributions)
+    private double GetPraw(
+        double boxCoxActionValue, 
+        UserAction userAction, 
+        IDictionary<UserAction, double> meansDistributions, 
+        int maxActionsCount)
     {
         return boxCoxActionValue > meansDistributions[userAction]
-            ? 1 - boxCoxActionValue / MaxActionsCount
-            : boxCoxActionValue / MaxActionsCount;
+            ? 1 - boxCoxActionValue / maxActionsCount
+            : boxCoxActionValue / maxActionsCount;
     }
 }
