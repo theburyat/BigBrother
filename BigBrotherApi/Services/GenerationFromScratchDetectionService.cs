@@ -9,6 +9,7 @@ namespace BigBrother.Services;
 public class GenerationFromScratchDetectionService: IGenerationFromScratchDetectionService
 {
     private const double NormalizationValue = 0.16;
+    private const double PasteFromUnknownSourceWeight = 5;
     
     private readonly ILogger<GenerationFromScratchDetectionService> _logger;
 
@@ -123,19 +124,13 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
     {
         var actionsWeights = new Dictionary<UserAction, double>();
         var examCount = committedActionsInExams.Count;
-
-        // TODO() think about handling paste from another source
+        
         await Task.Run(() =>
         {
             foreach (var committedActions in committedActionsInExams)
             {
                 foreach (var userAction in committedActions.Keys)
                 {
-                    if (userAction == UserAction.PasteFromUnknownSource)
-                    {
-                        continue;
-                    }
-
                     actionsWeights.TryAdd(userAction, 0);
                     actionsWeights[userAction] += committedActions[userAction] > 0 ? 1 : 0;
                 }
@@ -145,8 +140,6 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
                 .Select(x => new KeyValuePair<UserAction, double>(x.Key, Math.Pow(x.Value / examCount, 2)))
                 .ToDictionary(x => x.Key, x => x.Value);
         }, cancellationToken);
-        
-        actionsWeights[UserAction.PasteFromUnknownSource] = 5; 
 
         return actionsWeights;
     }
@@ -170,14 +163,19 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
             standardDeviationsFromBoxCoxDistributions,
             maxActionsCount,
             cancellationToken);
-        
+
         foreach (var userAction in committedActionsInExam.Keys)
         {
+            if (userAction == UserAction.PasteFromUnknownSource)
+            {
+                continue;
+            }
+
             numerator += actionWeights[userAction] * unweightedOutlierScore[userAction];
             denominator += actionWeights[userAction];
         }
 
-        return numerator / denominator;
+        return numerator / denominator + committedActionsInExam[UserAction.PasteFromUnknownSource] * PasteFromUnknownSourceWeight;
     }
 
     private async Task<IDictionary<UserAction, double>> GetUnweightedOutlierScoreForActionsInExamAsync(

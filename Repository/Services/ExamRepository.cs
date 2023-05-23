@@ -43,7 +43,7 @@ public class ExamRepository: IExamRepository
     {
         using (var context = new AppDbContext(_contextOptions))
         {
-            return _mapper.Map<IReadOnlyCollection<Exam>>(context.ExamEntities.Where(x => x.UserId == userId));
+            return _mapper.Map<IReadOnlyCollection<Exam>>(context.ExamEntities.Where(x => x.UserId == userId).ToArray());
         }
     }
 

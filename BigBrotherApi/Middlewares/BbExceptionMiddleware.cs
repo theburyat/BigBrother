@@ -47,7 +47,7 @@ public class BbExceptionMiddleware
         catch (Exception ex)
         {
             _logger.LogError($"Unhandled exception: {ex.Message}");
-            _logger.LogDebug(ex.StackTrace);
+            _logger.LogError(ex.StackTrace);
         }
     }
 }

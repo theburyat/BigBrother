@@ -15,7 +15,7 @@ public static class ExamExtensions
             { UserAction.Enter, exam.EnterCount },
             { UserAction.Select, exam.SelectCount },
             { UserAction.Paste, exam.PasteCount },
-            { UserAction.PasteFromUnknownSource, exam.PasteCount },
+            { UserAction.PasteFromUnknownSource, exam.PasteFromUnknownSourceCount },
             { UserAction.MoveCaretDown, exam.MoveCaretDownCount },
             { UserAction.MoveCaretLeft, exam.MoveCaretLeftCount },
             { UserAction.MoveCaretRight, exam.MoveCaretRightCount },
