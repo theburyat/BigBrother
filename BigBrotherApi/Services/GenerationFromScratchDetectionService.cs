@@ -124,17 +124,19 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
         var actionsWeights = new Dictionary<UserAction, double>();
         var examCount = committedActionsInExams.Count;
 
+        // TODO() think about handling paste from another source
         await Task.Run(() =>
         {
             foreach (var committedActions in committedActionsInExams)
             {
                 foreach (var userAction in committedActions.Keys)
                 {
-                    if (!actionsWeights.ContainsKey(userAction))
+                    if (userAction == UserAction.PasteFromUnknownSource)
                     {
-                        actionsWeights[userAction] = 0;
+                        continue;
                     }
 
+                    actionsWeights.TryAdd(userAction, 0);
                     actionsWeights[userAction] += committedActions[userAction] > 0 ? 1 : 0;
                 }
             }
@@ -143,6 +145,8 @@ public class GenerationFromScratchDetectionService: IGenerationFromScratchDetect
                 .Select(x => new KeyValuePair<UserAction, double>(x.Key, Math.Pow(x.Value / examCount, 2)))
                 .ToDictionary(x => x.Key, x => x.Value);
         }, cancellationToken);
+        
+        actionsWeights[UserAction.PasteFromUnknownSource] = 5; 
 
         return actionsWeights;
     }

@@ -9,6 +9,7 @@ public enum UserAction
     Enter,
     Select,
     Paste,
+    PasteFromUnknownSource,
     Type,
     MoveCaretDown,
     MoveCaretLeft,

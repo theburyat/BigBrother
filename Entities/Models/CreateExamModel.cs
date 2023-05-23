@@ -17,6 +17,8 @@ public class CreateExamModel
     public int SelectCount { get; set; }
 
     public int PasteCount { get; set; }
+    
+    public int PasteFromUnknownSourceCount { get; set; }
 
     public int TypeCount { get; set; }
     

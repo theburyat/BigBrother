@@ -73,6 +73,9 @@ public class LogFileParserService: ILogFileParserService
                     case UserAction.Paste:
                         exam.PasteCount += 1;
                         break;
+                    case UserAction.PasteFromUnknownSource:
+                        exam.PasteFromUnknownSourceCount += 1;
+                        break;
                     case UserAction.Type:
                         exam.TypeCount += 1;
                         break;
