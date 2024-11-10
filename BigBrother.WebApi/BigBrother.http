@@ -1,0 +1,6 @@
+@BigBrother_HostAddress = http://localhost:5034
+
+GET {{BigBrother_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
