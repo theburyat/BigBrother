@@ -1,6 +1,6 @@
 using BigBrother.Domain.Entities;
-using BigBrother.Domain.ProviderInterfaces;
-using BigBrother.Domain.RepositoryInterfaces;
+using BigBrother.Domain.Interfaces.Providers;
+using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 

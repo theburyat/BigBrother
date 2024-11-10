@@ -1,12 +1,13 @@
+using System.Data.Common;
 using BigBrother.Domain.Entities;
 
-namespace BigBrother.Domain.RepositoryInterfaces;
+namespace BigBrother.Domain.Interfaces.Providers;
 
-public interface IUserRepository
+public interface IUserProvider
 {
-    public Task<bool> IsUserExistAsync(int id, CancellationToken cancellationToken);
-
     public Task<bool> IsUserExistAsync(string name, string group, CancellationToken cancellationToken);
+    
+    public Task<bool> IsUserExistAsync(int id, CancellationToken cancellationToken);
 
     public Task<User> GetUserAsync(int id, CancellationToken cancellationToken);
     

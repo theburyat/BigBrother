@@ -1,6 +1,6 @@
 using BigBrother.Domain.Entities;
 
-namespace BigBrother.Domain.RepositoryInterfaces;
+namespace BigBrother.Domain.Interfaces.Repositories;
 
 public interface IScoreRepository {
     public Task<IEnumerable<Score>> GetSessionsScoresAsync(int sessionId, CancellationToken cancellationToken);
