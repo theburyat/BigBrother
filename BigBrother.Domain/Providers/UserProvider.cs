@@ -17,7 +17,8 @@ public sealed class UserProvider : IUserProvider
 
     public async Task<bool> IsUserExistAsync(string name, string group, CancellationToken cancellationToken)
     {
-        if (!await _groupProvider.IsGroupExistAsync(group, cancellationToken)) {
+        if (!await _groupProvider.IsGroupExistAsync(group, cancellationToken)) 
+        {
             throw new Exception();
         }
         return await _repository.IsUserExistAsync(name, group, cancellationToken);
@@ -36,7 +37,8 @@ public sealed class UserProvider : IUserProvider
 
     public async Task<User> GetUserAsync(string name, string group, CancellationToken cancellationToken)
     {
-        if (!await IsUserExistAsync(name, group, cancellationToken)) {
+        if (!await IsUserExistAsync(name, group, cancellationToken)) 
+        {
             throw new Exception();
         }
         return await _repository.GetUserAsync(name, group, cancellationToken);
@@ -44,7 +46,8 @@ public sealed class UserProvider : IUserProvider
 
     public async Task CreateUserAsync(string name, string group, CancellationToken cancellationToken)
     {
-        if (await IsUserExistAsync(name, group, cancellationToken)) {
+        if (await IsUserExistAsync(name, group, cancellationToken)) 
+        {
             throw new Exception();
         }
         await _repository.CreateUserAsync(name, group, cancellationToken);
@@ -56,8 +59,10 @@ public sealed class UserProvider : IUserProvider
         await _repository.DeleteUserAsync(id, cancellationToken);
     }
 
-    private async Task ValidateUserExistingAsync(int id, CancellationToken cancellationToken) {
-        if (!await IsUserExistAsync(id, cancellationToken)) {
+    private async Task ValidateUserExistingAsync(int id, CancellationToken cancellationToken) 
+    {
+        if (!await IsUserExistAsync(id, cancellationToken)) 
+        {
             throw new Exception();
         }
     }

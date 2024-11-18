@@ -19,7 +19,8 @@ public sealed class ScoreProvider : IScoreProvider
 
     public async Task<IEnumerable<Score>> GetSessionsScoresAsync(int sessionId, CancellationToken cancellationToken)
     {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) {
+        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
+        {
             throw new Exception();
         }
         return await _repository.GetSessionsScoresAsync(sessionId, cancellationToken);
@@ -31,13 +32,16 @@ public sealed class ScoreProvider : IScoreProvider
         await _repository.AddScoreAsync(score, cancellationToken);
     }
 
-    private async Task ValidateScoreAsync(Score score, CancellationToken cancellationToken) {
+    private async Task ValidateScoreAsync(Score score, CancellationToken cancellationToken) 
+    {
         ArgumentNullException.ThrowIfNull(score);
         
-        if (!await _sessionProvider.IsSessionExistAsync(score.SessionId, cancellationToken)) {
+        if (!await _sessionProvider.IsSessionExistAsync(score.SessionId, cancellationToken)) 
+        {
             throw new Exception();
         }
-        if (!await _userProvider.IsUserExistAsync(score.UserId, cancellationToken)) {
+        if (!await _userProvider.IsUserExistAsync(score.UserId, cancellationToken)) 
+        {
             throw new Exception();
         }
         // TODO check if session group id = user group id

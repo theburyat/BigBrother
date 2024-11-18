@@ -25,7 +25,8 @@ public sealed class ActionProvider : IActionProvider
 
     public async Task<IEnumerable<UserActions>> GetSessionUsersActionsAsync(int sessionId, CancellationToken cancellationToken)
     {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) {
+        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
+        {
             throw new Exception();
         }
         return await _repository.GetSessionUsersActionsAsync(sessionId, cancellationToken);
@@ -37,16 +38,20 @@ public sealed class ActionProvider : IActionProvider
         return await _repository.GetSessionUserActionsAsync(sessionId, userId, cancellationToken);
     }
 
-    private async Task ValidateActionAsync(IdeAction action, CancellationToken cancellationToken) {
+    private async Task ValidateActionAsync(IdeAction action, CancellationToken cancellationToken) 
+    {
         ArgumentNullException.ThrowIfNull(action);
         await ValidateActionParametersAsync(action.SessionId, action.UserId, cancellationToken);
     }
 
-    private async Task ValidateActionParametersAsync(int sessionId, int userId, CancellationToken cancellationToken) {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) {
+    private async Task ValidateActionParametersAsync(int sessionId, int userId, CancellationToken cancellationToken) 
+    {
+        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
+        {
             throw new Exception();
         }
-        if (!await _userProvider.IsUserExistAsync(userId, cancellationToken)) {
+        if (!await _userProvider.IsUserExistAsync(userId, cancellationToken)) 
+        {
             throw new Exception();
         }
 

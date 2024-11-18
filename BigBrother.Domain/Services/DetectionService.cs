@@ -13,7 +13,8 @@ public class DetectionService : IDetectionService
 
     public async Task<IDictionary<int, double>> DetectAnomaliesAsync(IReadOnlyCollection<UserActions> usersActions, CancellationToken cancellationToken)
     {
-        if (usersActions.Count() < 2) {
+        if (usersActions.Count() < 2) 
+        {
             throw new Exception("few actions");
         }
         
@@ -145,10 +146,7 @@ public class DetectionService : IDetectionService
         return result;
     }
 
-    private double GetPraw(
-        IdeActionType action,
-        double distributionValue,
-        IReadOnlyDictionary<IdeActionType, double> distributionsMeans,
+    private double GetPraw(IdeActionType action, double distributionValue, IReadOnlyDictionary<IdeActionType, double> distributionsMeans, 
         int maxActionsCount)
     {
         return distributionValue > distributionsMeans[action]

@@ -2,7 +2,8 @@ using BigBrother.Domain.Entities.Enums;
 
 namespace BigBrother.Domain.Entities;
 
-public sealed class IdeAction {
+public sealed class IdeAction 
+{
     public Guid Id { get; set; }
 
     public IdeActionType ActionType { get; set; }

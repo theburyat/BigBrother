@@ -1,6 +1,7 @@
 namespace BigBrother.Domain.Entities.Enums;
 
-public enum IdeActionType {
+public enum IdeActionType 
+{
     None,
     Copy,
     Cut,
