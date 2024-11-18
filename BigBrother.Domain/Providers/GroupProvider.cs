@@ -4,7 +4,7 @@ using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class GroupProvider: IGroupProvider
+public sealed class GroupProvider: IGroupProvider
 {
     private readonly IGroupRepository _repository;
     

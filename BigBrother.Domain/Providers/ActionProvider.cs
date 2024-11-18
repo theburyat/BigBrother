@@ -4,7 +4,7 @@ using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class ActionProvider : IActionProvider
+public sealed class ActionProvider : IActionProvider
 {
     private readonly IActionRepository _repository;
     private readonly ISessionProvider _sessionProvider;
@@ -23,10 +23,18 @@ public class ActionProvider : IActionProvider
         await _repository.AddActionAsync(action, cancellationToken);
     }
 
-    public async Task<IEnumerable<IdeAction>> GetUserSessionActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<UserActions>> GetSessionUsersActionsAsync(int sessionId, CancellationToken cancellationToken)
+    {
+        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) {
+            throw new Exception();
+        }
+        return await _repository.GetSessionUsersActionsAsync(sessionId, cancellationToken);
+    }
+
+    public async Task<IEnumerable<IdeAction>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
         await ValidateActionParametersAsync(sessionId, userId, cancellationToken);
-        return await _repository.GetUserSessionActionsAsync(sessionId, userId, cancellationToken);
+        return await _repository.GetSessionUserActionsAsync(sessionId, userId, cancellationToken);
     }
 
     private async Task ValidateActionAsync(IdeAction action, CancellationToken cancellationToken) {

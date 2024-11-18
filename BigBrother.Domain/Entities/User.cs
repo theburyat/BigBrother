@@ -1,6 +1,6 @@
 namespace BigBrother.Domain.Entities;
 
-public class User
+public sealed class User
 {
     public int Id { get; set; }
 

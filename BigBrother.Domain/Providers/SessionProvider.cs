@@ -4,7 +4,7 @@ using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class SessionProvider: ISessionProvider
+public sealed class SessionProvider: ISessionProvider
 {
     private ISessionRepository _repository;
     private IGroupProvider _groupProvider;

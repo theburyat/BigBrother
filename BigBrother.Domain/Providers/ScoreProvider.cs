@@ -4,7 +4,7 @@ using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class ScoreProvider : IScoreProvider
+public sealed class ScoreProvider : IScoreProvider
 {
     private readonly IScoreRepository _repository;
     private readonly ISessionProvider _sessionProvider;
