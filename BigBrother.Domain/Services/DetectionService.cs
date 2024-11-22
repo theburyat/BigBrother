@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Entities.Enums;
 using BigBrother.Domain.Extensions;
@@ -51,10 +50,10 @@ public class DetectionService : IDetectionService
         return result;
     }
 
-    private IReadOnlyDictionary<IdeActionType, double> GetDistributionsMeans(
-        IReadOnlyCollection<IReadOnlyDictionary<IdeActionType, double>> distributions)
+    private IReadOnlyDictionary<ActionType, double> GetDistributionsMeans(
+        IReadOnlyCollection<IReadOnlyDictionary<ActionType, double>> distributions)
     {
-        var result = new Dictionary<IdeActionType, double>();
+        var result = new Dictionary<ActionType, double>();
 
         foreach (var distribution in distributions)
         {
@@ -68,11 +67,11 @@ public class DetectionService : IDetectionService
         return result;
     }
 
-    private IReadOnlyDictionary<IdeActionType, double> GetDistributionsStandardDeviations(
-        IReadOnlyCollection<IReadOnlyDictionary<IdeActionType, double>> distributions,
-        IReadOnlyDictionary<IdeActionType, double> distributionsMeans)
+    private IReadOnlyDictionary<ActionType, double> GetDistributionsStandardDeviations(
+        IReadOnlyCollection<IReadOnlyDictionary<ActionType, double>> distributions,
+        IReadOnlyDictionary<ActionType, double> distributionsMeans)
     {
-        var result = new Dictionary<IdeActionType, double>();
+        var result = new Dictionary<ActionType, double>();
 
         foreach (var distribution in distributions)
         {
@@ -85,10 +84,10 @@ public class DetectionService : IDetectionService
         return result.ToDictionary(x => x.Key, x => Math.Sqrt(x.Value / distributions.Count));
     }
 
-    private IReadOnlyDictionary<IdeActionType, double> GetActionsWeights(
-        IReadOnlyCollection<IReadOnlyDictionary<IdeActionType, int>> distributions)
+    private IReadOnlyDictionary<ActionType, double> GetActionsWeights(
+        IReadOnlyCollection<IReadOnlyDictionary<ActionType, int>> distributions)
     {
-        var result = new Dictionary<IdeActionType, double>();
+        var result = new Dictionary<ActionType, double>();
 
         foreach (var distribution in distributions)
         {
@@ -103,34 +102,34 @@ public class DetectionService : IDetectionService
     }
 
     private double GetDistributionOutlierScore(
-        IReadOnlyDictionary<IdeActionType, double> distribution,
-        IReadOnlyDictionary<IdeActionType, double> distributionsMeans,
-        IReadOnlyDictionary<IdeActionType, double> distributionsStandardDeviations,
-        IReadOnlyDictionary<IdeActionType, double> weights,
+        IReadOnlyDictionary<ActionType, double> distribution,
+        IReadOnlyDictionary<ActionType, double> distributionsMeans,
+        IReadOnlyDictionary<ActionType, double> distributionsStandardDeviations,
+        IReadOnlyDictionary<ActionType, double> weights,
         int maxActionsCount)
     {
         double numerator = 0;
         double denominator = 0;
 
-        var unweightedOutlierScore = GetUnweightedDistributionOutlierScore(distribution, distributionsMeans, 
+        var actionScores = GetActionsOutlierScores(distribution, distributionsMeans, 
             distributionsStandardDeviations, maxActionsCount);
 
         foreach (var action in distribution.Keys)
         {
-            numerator += weights[action] * unweightedOutlierScore[action];
+            numerator += weights[action] * actionScores[action];
             denominator += weights[action];
         }
 
         return numerator / denominator;
     }
 
-    private IReadOnlyDictionary<IdeActionType, double> GetUnweightedDistributionOutlierScore(
-        IReadOnlyDictionary<IdeActionType, double> distribution,
-        IReadOnlyDictionary<IdeActionType, double> distributionsMeans,
-        IReadOnlyDictionary<IdeActionType, double> distributionsStandardDeviations,
+    private IReadOnlyDictionary<ActionType, double> GetActionsOutlierScores(
+        IReadOnlyDictionary<ActionType, double> distribution,
+        IReadOnlyDictionary<ActionType, double> distributionsMeans,
+        IReadOnlyDictionary<ActionType, double> distributionsStandardDeviations,
         int maxActionsCount)
     {
-        var result = new Dictionary<IdeActionType, double>();
+        var result = new Dictionary<ActionType, double>();
 
         foreach (var action in distribution.Keys)
         {
@@ -146,7 +145,7 @@ public class DetectionService : IDetectionService
         return result;
     }
 
-    private double GetPraw(IdeActionType action, double distributionValue, IReadOnlyDictionary<IdeActionType, double> distributionsMeans, 
+    private double GetPraw(ActionType action, double distributionValue, IReadOnlyDictionary<ActionType, double> distributionsMeans, 
         int maxActionsCount)
     {
         return distributionValue > distributionsMeans[action]

@@ -6,5 +6,5 @@ public sealed class UserActions
 {
     public int UserId { get; set; }
 
-    public IReadOnlyDictionary<IdeActionType, int> Actions { get; set; }
+    public required IReadOnlyDictionary<ActionType, int> Actions { get; set; }
 }

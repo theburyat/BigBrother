@@ -6,9 +6,11 @@ public interface ISessionRepository
 {
     Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken);
 
+    Task<Session?> GetSessionAsync(int id, CancellationToken cancellationToken);
+
     Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken);
 
-    Task<int> DeleteSessionAsync(int id, CancellationToken cancellationToken);
+    Task DeleteSessionAsync(int id, CancellationToken cancellationToken);
 
     Task StartSessionAsync(int id, CancellationToken cancellationToken);
     

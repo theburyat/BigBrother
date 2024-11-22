@@ -15,33 +15,18 @@ public sealed class UserProvider : IUserProvider
         _groupProvider = groupProvider;
     }
 
-    public async Task<bool> IsUserExistAsync(string name, string group, CancellationToken cancellationToken)
-    {
-        if (!await _groupProvider.IsGroupExistAsync(group, cancellationToken)) 
-        {
-            throw new Exception();
-        }
-        return await _repository.IsUserExistAsync(name, group, cancellationToken);
-    }
-
-    public async Task<bool> IsUserExistAsync(int id, CancellationToken cancellationToken)
-    {
-        return await _repository.IsUserExistAsync(id, cancellationToken);
-    }
-
     public async Task<User> GetUserAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateUserExistingAsync(id, cancellationToken);
-        return await _repository.GetUserAsync(id, cancellationToken);
+        var user = await _repository.GetUserAsync(id, cancellationToken);
+        
+        return user ?? throw new Exception();
     }
 
     public async Task<User> GetUserAsync(string name, string group, CancellationToken cancellationToken)
     {
-        if (!await IsUserExistAsync(name, group, cancellationToken)) 
-        {
-            throw new Exception();
-        }
-        return await _repository.GetUserAsync(name, group, cancellationToken);
+        var user = await _repository.GetUserAsync(name, group, cancellationToken);
+
+        return user ?? throw new Exception();
     }
 
     public async Task CreateUserAsync(string name, string group, CancellationToken cancellationToken)
@@ -55,15 +40,24 @@ public sealed class UserProvider : IUserProvider
 
     public async Task DeleteUserAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateUserExistingAsync(id, cancellationToken);
-        await _repository.DeleteUserAsync(id, cancellationToken);
-    }
-
-    private async Task ValidateUserExistingAsync(int id, CancellationToken cancellationToken) 
-    {
         if (!await IsUserExistAsync(id, cancellationToken)) 
         {
             throw new Exception();
         }
+        await _repository.DeleteUserAsync(id, cancellationToken);
+    }
+
+    public async Task<bool> IsUserExistAsync(int id, CancellationToken cancellationToken)
+    {
+        return await _repository.IsUserExistAsync(id, cancellationToken);
+    }
+
+    public async Task<bool> IsUserExistAsync(string name, string group, CancellationToken cancellationToken)
+    {
+        if (!await _groupProvider.IsGroupExistAsync(group, cancellationToken)) 
+        {
+            throw new Exception();
+        }
+        return await _repository.IsUserExistAsync(name, group, cancellationToken);
     }
 }

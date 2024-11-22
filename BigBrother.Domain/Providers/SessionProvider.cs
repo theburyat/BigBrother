@@ -15,11 +15,6 @@ public sealed class SessionProvider: ISessionProvider
         _groupProvider = groupProvider;
     }
 
-    public Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken) 
-    {
-        return _repository.IsSessionExistAsync(id, cancellationToken);
-    }
-
     public async Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken)
     {
         await ValidateGroupExistingAsync(groupId, cancellationToken);
@@ -47,7 +42,18 @@ public sealed class SessionProvider: ISessionProvider
     public async Task StopSessionAsync(int id, CancellationToken cancellationToken)
     {
         await ValidateSessionExistingAsync(id, cancellationToken);
+        
+        var session = await _repository.GetSessionAsync(id, cancellationToken);
+        if (session!.StartDate == null) {
+            throw new Exception();
+        }
+
         await _repository.StopSessionAsync(id, cancellationToken);
+    }
+
+    public Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken) 
+    {
+        return _repository.IsSessionExistAsync(id, cancellationToken);
     }
 
     private async Task ValidateSessionExistingAsync(int id, CancellationToken cancellationToken)

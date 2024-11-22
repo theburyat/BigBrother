@@ -17,7 +17,7 @@ public sealed class ActionProvider : IActionProvider
         _userProvider = userProvider;
     }
 
-    public async Task AddActionAsync(IdeAction action, CancellationToken cancellationToken)
+    public async Task AddActionAsync(@Action action, CancellationToken cancellationToken)
     {
         await ValidateActionAsync(action, cancellationToken);
         await _repository.AddActionAsync(action, cancellationToken);
@@ -32,13 +32,13 @@ public sealed class ActionProvider : IActionProvider
         return await _repository.GetSessionUsersActionsAsync(sessionId, cancellationToken);
     }
 
-    public async Task<IEnumerable<IdeAction>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Action>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
         await ValidateActionParametersAsync(sessionId, userId, cancellationToken);
         return await _repository.GetSessionUserActionsAsync(sessionId, userId, cancellationToken);
     }
 
-    private async Task ValidateActionAsync(IdeAction action, CancellationToken cancellationToken) 
+    private async Task ValidateActionAsync(Action action, CancellationToken cancellationToken) 
     {
         ArgumentNullException.ThrowIfNull(action);
         await ValidateActionParametersAsync(action.SessionId, action.UserId, cancellationToken);
