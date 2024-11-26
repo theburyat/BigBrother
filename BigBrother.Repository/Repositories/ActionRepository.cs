@@ -22,8 +22,10 @@ public class ActionRepository : IActionRepository
     {
         using var context = _contextFactory.GetContext();
 
-        var entity = new ActionEntity {
+        var entity = new ActionEntity 
+        {
             ActionType = action.ActionType,
+            DetectTime = action.DetectTime,
             SessionId = action.SessionId,
             UserId = action.UserId,
             Message = action.Message
@@ -45,17 +47,19 @@ public class ActionRepository : IActionRepository
 
         var actionTypes = Enum.GetValues<ActionType>();
 
-        foreach (var userId in userIds) {
-            var actions = await context.Actions.AsNoTracking()
-                .Where(x => x.SessionId == sessionId && x.UserId == userId)
-                .ToListAsync();
-
+        foreach (var userId in userIds) 
+        {
             var actionCounts = new Dictionary<ActionType, int>();
-            foreach (var actionType in actionTypes) {
-                var count = actions.Count(x => x.ActionType == actionType);
+            foreach (var actionType in actionTypes) 
+            {
+                var count = await context.Actions.AsNoTracking()
+                    .Where(x => x.SessionId == sessionId && x.UserId == userId && x.ActionType == actionType)
+                    .CountAsync(cancellationToken);
+                
                 actionCounts[actionType] = count;
             }
-            var userActions = new UserActions {
+            var userActions = new UserActions 
+            {
                 UserId = userId,
                 Actions = actionCounts
             };
@@ -72,9 +76,11 @@ public class ActionRepository : IActionRepository
 
         return await context.Actions.AsNoTracking()
             .Where(x => x.SessionId == sessionId && x.UserId == userId)
+            .OrderBy(x => x.DetectTime)
             .Select(x => new Action {
                 Id = x.Id,
                 ActionType = x.ActionType,
+                DetectTime = x.DetectTime,
                 SessionId = x.SessionId,
                 UserId = x.UserId,
                 Message = x.Message

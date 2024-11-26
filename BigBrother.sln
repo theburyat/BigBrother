@@ -6,6 +6,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigBrother.Domain", "BigBro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigBrother.Repository", "BigBrother.Repository\BigBrother.Repository.csproj", "{A430925E-8790-41B6-93BC-FC03EE9A4425}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BigBrother.WebApp", "BigBrother.WebApp\BigBrother.WebApp.csproj", "{D60F3BAA-0B16-481E-BB9F-1C415169F73F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{A430925E-8790-41B6-93BC-FC03EE9A4425}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A430925E-8790-41B6-93BC-FC03EE9A4425}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A430925E-8790-41B6-93BC-FC03EE9A4425}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D60F3BAA-0B16-481E-BB9F-1C415169F73F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D60F3BAA-0B16-481E-BB9F-1C415169F73F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D60F3BAA-0B16-481E-BB9F-1C415169F73F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D60F3BAA-0B16-481E-BB9F-1C415169F73F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

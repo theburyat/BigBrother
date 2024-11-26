@@ -17,7 +17,7 @@ public class DetectionService : IDetectionService
             throw new Exception("few actions");
         }
         
-        var result = new ConcurrentDictionary<int, double>() as IDictionary<int, double>;
+        var result = new ConcurrentDictionary<int, double>();
 
         var actionsDistributions = usersActions.Select(x => x.Actions).ToArray();
         var boxCoxDistributions = actionsDistributions.Select(x => x.ToBoxCoxDistribution()).ToArray();

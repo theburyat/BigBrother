@@ -5,13 +5,13 @@ namespace BigBrother.Repository.Entities;
 
 [Table("Scores")]
 [PrimaryKey(nameof(SessionId), nameof(UserId))]
-internal sealed class ScoreEntity 
+public sealed class ScoreEntity 
 {
-    internal double Rating { get; set; }
+    public double Rating { get; set; }
 
-    internal int SessionId { get; set; }
-    internal SessionEntity? Session { get; set; }
+    public int SessionId { get; set; }
+    public SessionEntity? Session { get; set; }
 
-    internal int UserId { get; set; }
-    internal UserEntity? User { get; set; }
+    public int UserId { get; set; }
+    public UserEntity? User { get; set; }
 }

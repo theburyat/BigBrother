@@ -17,11 +17,12 @@ public class ScoreRepository : IScoreRepository
 
     public async Task<IEnumerable<Score>> GetSessionsScoresAsync(int sessionId, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
         return await context.Scores.AsNoTracking()
             .Where(x => x.SessionId == sessionId)
-            .Select(x => new Score {
+            .Select(x => new Score 
+            {
                 Rating = x.Rating,
                 SessionId = x.UserId,
                 UserId = x.UserId
@@ -29,11 +30,30 @@ public class ScoreRepository : IScoreRepository
             .ToListAsync();
     }
 
+    public async Task<Score?> GetScoreAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    {
+        await using var context = _contextFactory.GetContext();
+
+        var entity = await context.Scores.AsNoTracking().FirstOrDefaultAsync(x => x.SessionId == sessionId && x.UserId == userId, cancellationToken);
+        if (entity == null) 
+        {
+            return null;
+        }
+
+        return new Score 
+        {
+            SessionId = entity.SessionId,
+            UserId = entity.UserId,
+            Rating = entity.Rating
+        };
+    }
+
     public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
-        var entity = new ScoreEntity {
+        var entity = new ScoreEntity 
+        {
             Rating = score.Rating,
             SessionId = score.SessionId,
             UserId = score.UserId

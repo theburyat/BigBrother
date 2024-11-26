@@ -7,25 +7,48 @@ namespace BigBrother.Domain.Services;
 public sealed class AnalysisService : IAnalysisService
 {
     private readonly IDetectionService _detectionService;
+    private readonly ISessionProvider _sessionProvider;
     private readonly IActionProvider _actionProvider;
     private readonly IScoreProvider _scoreProvider;
 
-    public AnalysisService(IDetectionService detectionService, IActionProvider actionProvider, IScoreProvider scoreProvider)
+    public AnalysisService(IDetectionService detectionService, ISessionProvider sessionProvider, IActionProvider actionProvider, IScoreProvider scoreProvider)
     {
         _detectionService = detectionService;
+        _sessionProvider = sessionProvider;
         _actionProvider = actionProvider;
         _scoreProvider = scoreProvider;
     }
 
     public async Task RunAnalysisAsync(int sessionId, CancellationToken cancellationToken)
     {
+        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
+        {
+            throw new Exception();
+        }
+
+        var session = await _sessionProvider.GetSessionAsync(sessionId, cancellationToken);
+        if (session.StartDate == null) 
+        {
+            throw new Exception();
+        }
+        if (session.EndDate == null) 
+        {
+            throw new Exception();
+        }
+
         var actions = await _actionProvider.GetSessionUsersActionsAsync(sessionId, cancellationToken);
+        if (actions.Count() == 0) 
+        {
+            throw new Exception();
+        }
         
         var analysisResult = await _detectionService.DetectAnomaliesAsync(actions.ToArray(), cancellationToken);
         
         var tasks = new List<Task>();
-        foreach (var (userId, rating) in analysisResult) {
-            var score = new Score {
+        foreach (var (userId, rating) in analysisResult) 
+        {
+            var score = new Score 
+            {
                 SessionId = sessionId,
                 UserId = userId,
                 Rating = rating

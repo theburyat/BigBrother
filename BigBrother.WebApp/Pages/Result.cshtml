@@ -1,0 +1,14 @@
+@page "session/{sessionId:int}/user/{userId:int}"
+@model ResultModel
+
+<h2>User: @Model.User?.Name</h2>
+<h2>Rating: @Model.Score?.Rating</h2>
+<h2>Actions:</h2>
+<ul>
+    @foreach (var action in Model?.Actions ?? [])
+    {
+        <li>
+            <h4>@action.DetectTime - @action.ActionType.ToString() - @action.Message</h4>
+        </li>
+    }
+</ul>

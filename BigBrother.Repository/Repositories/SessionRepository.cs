@@ -17,11 +17,12 @@ public class SessionRepository : ISessionRepository
 
      public async Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
         return await context.Sessions.AsNoTracking()
             .Where(x => x.GroupId == groupId)
-            .Select(x => new Session {
+            .Select(x => new Session 
+            {
                 Id = x.Id,
                 GroupId = x.GroupId,
                 StartDate = x.StartDate,
@@ -32,14 +33,16 @@ public class SessionRepository : ISessionRepository
 
     public async Task<Session?> GetSessionAsync(int id, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
         var session = await context.Sessions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        if (session == null) {
+        if (session == null) 
+        {
             return null;
         }
 
-        return new Session {
+        return new Session 
+        {
             Id = session.Id,
             GroupId = session.GroupId,
             StartDate = session.StartDate,
@@ -49,7 +52,7 @@ public class SessionRepository : ISessionRepository
 
     public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
         var sessionEntity = new SessionEntity { GroupId = groupId };
         await context.Sessions.AddAsync(sessionEntity, cancellationToken);
@@ -59,31 +62,31 @@ public class SessionRepository : ISessionRepository
         return sessionEntity.Id;
     }
 
-    public Task DeleteSessionAsync(int id, CancellationToken cancellationToken)
+    public async Task DeleteSessionAsync(int id, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
-        return context.Sessions.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);
+        await context.Sessions.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);
     }
 
-    public Task StartSessionAsync(int id, CancellationToken cancellationToken)
+    public async Task StartSessionAsync(int id, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
-        return context.Sessions.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.StartDate, y => DateTime.UtcNow), cancellationToken);
+        await context.Sessions.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.StartDate, y => DateTime.UtcNow), cancellationToken);
     }
 
-    public Task StopSessionAsync(int id, CancellationToken cancellationToken)
+    public async Task StopSessionAsync(int id, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
-        return context.Sessions.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.EndDate, y => DateTime.UtcNow), cancellationToken);
+        await context.Sessions.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.EndDate, y => DateTime.UtcNow), cancellationToken);
     }
 
-    public Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken)
+    public async Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
-        return context.Sessions.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken);
+        return await context.Sessions.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken);
     }
 }

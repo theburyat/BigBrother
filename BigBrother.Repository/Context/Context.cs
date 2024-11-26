@@ -1,19 +1,21 @@
+using System.Diagnostics.CodeAnalysis;
 using BigBrother.Repository.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace BigBrother.Repository.Context;
 
+[SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Global")]
 public sealed class Context : DbContext
 {
     private readonly string _connectionString;
 
-    internal DbSet<GroupEntity> Groups => null!;
-    internal DbSet<UserEntity> Users => null!;
-    internal DbSet<SessionEntity> Sessions => null!;
-    internal DbSet<ScoreEntity> Scores => null!;
-    internal DbSet<ActionEntity> Actions => null!;
+    public DbSet<GroupEntity> Groups { get; set; }
+    public DbSet<UserEntity> Users { get; set; }
+    public DbSet<SessionEntity> Sessions { get; set; }
+    public DbSet<ScoreEntity> Scores { get; set; }
+    public DbSet<ActionEntity> Actions { get; set; }
 
-    internal Context(string connectionString)
+    public Context(string connectionString)
     {
         _connectionString = connectionString;
 

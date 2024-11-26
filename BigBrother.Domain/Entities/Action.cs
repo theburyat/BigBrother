@@ -9,6 +9,8 @@ public sealed class Action
     public Guid Id { get; set; }
 
     public ActionType ActionType { get; set; }
+
+    public DateTime DetectTime { get; set; }
     
     public int SessionId { get; set; }
 

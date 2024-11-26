@@ -26,6 +26,12 @@ public sealed class ScoreProvider : IScoreProvider
         return await _repository.GetSessionsScoresAsync(sessionId, cancellationToken);
     }
 
+    public async Task<Score> GetScoreAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    {
+        var score = await _repository.GetScoreAsync(sessionId, userId, cancellationToken);
+        return score ?? throw new Exception();
+    }
+
     public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
     {
         await ValidateScoreAsync(score, cancellationToken);

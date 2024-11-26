@@ -8,11 +8,22 @@ public sealed class UserProvider : IUserProvider
 {
     private readonly IUserRepository _repository;
     private readonly IGroupProvider _groupProvider;
+    private readonly ISessionProvider _sessionProvider;
 
-    public UserProvider(IUserRepository repository, IGroupProvider groupProvider)
+    public UserProvider(IUserRepository repository, IGroupProvider groupProvider, ISessionProvider sessionProvider)
     {
         _repository = repository;
         _groupProvider = groupProvider;
+        _sessionProvider = sessionProvider;
+    }
+
+    public async Task<IEnumerable<User>> GetSessionUsersAsync(int sessionId, CancellationToken cancellationToken)
+    {
+        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
+        {
+            throw new Exception();
+        }
+        return await _repository.GetSessionUsersAsync(sessionId, cancellationToken);
     }
 
     public async Task<User> GetUserAsync(int id, CancellationToken cancellationToken)

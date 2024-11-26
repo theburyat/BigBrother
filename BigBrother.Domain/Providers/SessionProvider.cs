@@ -20,7 +20,14 @@ public sealed class SessionProvider: ISessionProvider
         await ValidateGroupExistingAsync(groupId, cancellationToken);
         return await _repository.GetGroupSessionsAsync(groupId, cancellationToken);
     }
-    
+
+    public async Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken)
+    {
+        var session = await _repository.GetSessionAsync(id, cancellationToken);
+        
+        return session ?? throw new Exception();
+    }
+
     public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
     {
         await ValidateGroupExistingAsync(groupId, cancellationToken);

@@ -4,17 +4,19 @@ using BigBrother.Domain.Entities.Enums;
 namespace BigBrother.Repository.Entities;
 
 [Table("Actions")]
-internal sealed class ActionEntity 
+public sealed class ActionEntity 
 {
-    internal Guid Id { get; set; }
+    public Guid Id { get; set; }
 
-    internal ActionType ActionType { get; set; }
+    public ActionType ActionType { get; set; }
 
-    internal string? Message { get; set; }
+    public DateTime DetectTime { get; set; }
 
-    internal int SessionId { get; set; }
-    internal SessionEntity? Session { get; set; }
+    public string? Message { get; set; }
 
-    internal int UserId { get; set; }
-    internal UserEntity? User { get; set; }
+    public int SessionId { get; set; }
+    public SessionEntity? Session { get; set; }
+
+    public int UserId { get; set; }
+    public UserEntity? User { get; set; }
 }

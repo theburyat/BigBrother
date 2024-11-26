@@ -4,13 +4,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace BigBrother.Repository.Entities;
 
 [Table("Groups")]
-internal sealed class GroupEntity 
+public sealed class GroupEntity 
 {
-    internal int Id { get; set; }
+    public int Id { get; set; }
 
     [Required]
-    internal required string Name { get; set; }
+    public required string Name { get; set; }
 
-    internal List<UserEntity> Users { get; set; } = new();
-    internal List<SessionEntity> Sessions { get; set; } = new();
+    public List<UserEntity> Users { get; set; } = new();
+    public List<SessionEntity> Sessions { get; set; } = new();
 }

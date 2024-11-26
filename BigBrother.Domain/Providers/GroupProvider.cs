@@ -18,6 +18,13 @@ public sealed class GroupProvider: IGroupProvider
         return _repository.GetGroupsAsync(cancellationToken);
     }
 
+    public async Task<Group> GetGroupAsync(int id, CancellationToken cancellationToken)
+    {
+        var group = await _repository.GetGroupAsync(id, cancellationToken);
+
+        return group ?? throw new Exception();
+    }
+
     public async Task<int> CreateGroupAsync(string name, CancellationToken cancellationToken)
     {
         if (await IsGroupExistAsync(name, cancellationToken))
