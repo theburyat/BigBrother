@@ -1,6 +1,7 @@
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BigBrother.WebApp.Pages;
@@ -60,7 +61,9 @@ public class SessionModel : PageModel
     private async Task GetPageInfoAsync(int id, CancellationToken cancellationToken)
     {
         Session = await _sessionProvider.GetSessionAsync(id, cancellationToken);
-        Scores = await _scoreProvider.GetSessionsScoresAsync(id, cancellationToken);
-        Users = await _userProvider.GetSessionUsersAsync(id, cancellationToken);
+        Users = await _userProvider.GetUsersBySessionAsync(id, cancellationToken);
+        
+        var scores = await _scoreProvider.GetScoresBySessionAsync(id, cancellationToken);
+        Scores = scores.OrderBy(x => x.Rating);
     }
 }

@@ -15,11 +15,24 @@ public class SessionRepository : ISessionRepository
         _contextFactory = contextFactory;
     }
 
-     public async Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken)
+    public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 
-        return await context.Sessions.AsNoTracking()
+        var sessionEntity = new SessionEntity { GroupId = groupId };
+        await context.Sessions.AddAsync(sessionEntity, cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return sessionEntity.Id;
+    }
+
+     public async Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken)
+    {
+        await using var context = _contextFactory.GetContext();
+
+        return await context.Sessions
+            .AsNoTracking()
             .Where(x => x.GroupId == groupId)
             .Select(x => new Session 
             {
@@ -35,7 +48,10 @@ public class SessionRepository : ISessionRepository
     {
         await using var context = _contextFactory.GetContext();
 
-        var session = await context.Sessions.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        var session = await context.Sessions
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+        
         if (session == null) 
         {
             return null;
@@ -50,43 +66,39 @@ public class SessionRepository : ISessionRepository
         };
     }
 
-    public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
-    {
-        await using var context = _contextFactory.GetContext();
-
-        var sessionEntity = new SessionEntity { GroupId = groupId };
-        await context.Sessions.AddAsync(sessionEntity, cancellationToken);
-
-        await context.SaveChangesAsync(cancellationToken);
-
-        return sessionEntity.Id;
-    }
-
     public async Task DeleteSessionAsync(int id, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 
-        await context.Sessions.Where(x => x.Id == id).ExecuteDeleteAsync(cancellationToken);
+        await context.Sessions
+            .Where(x => x.Id == id)
+            .ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task StartSessionAsync(int id, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 
-        await context.Sessions.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.StartDate, y => DateTime.UtcNow), cancellationToken);
+        await context.Sessions
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.StartDate, y => DateTime.UtcNow), cancellationToken);
     }
 
     public async Task StopSessionAsync(int id, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 
-        await context.Sessions.Where(x => x.Id == id).ExecuteUpdateAsync(x => x.SetProperty(y => y.EndDate, y => DateTime.UtcNow), cancellationToken);
+        await context.Sessions
+            .Where(x => x.Id == id)
+            .ExecuteUpdateAsync(x => x.SetProperty(y => y.EndDate, y => DateTime.UtcNow), cancellationToken);
     }
 
     public async Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 
-        return await context.Sessions.AsNoTracking().AnyAsync(x => x.Id == id, cancellationToken);
+        return await context.Sessions
+            .AsNoTracking()
+            .AnyAsync(x => x.Id == id, cancellationToken);
     }
 }

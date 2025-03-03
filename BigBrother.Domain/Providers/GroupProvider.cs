@@ -12,6 +12,16 @@ public sealed class GroupProvider: IGroupProvider
     {
         _repository = repository;
     }
+
+    public async Task<int> CreateGroupAsync(string name, CancellationToken cancellationToken)
+    {
+        if (await _repository.IsGroupExistAsync(name, cancellationToken))
+        {
+            throw new Exception();
+        }
+
+        return await _repository.CreateGroupAsync(name, cancellationToken);
+    }
     
     public Task<IEnumerable<Group>> GetGroupsAsync(CancellationToken cancellationToken)
     {
@@ -25,33 +35,18 @@ public sealed class GroupProvider: IGroupProvider
         return group ?? throw new Exception();
     }
 
-    public async Task<int> CreateGroupAsync(string name, CancellationToken cancellationToken)
-    {
-        if (await IsGroupExistAsync(name, cancellationToken))
-        {
-            throw new Exception();
-        }
-
-        return await _repository.CreateGroupAsync(name, cancellationToken);
-    }
-
     public async Task DeleteGroupAsync(int id, CancellationToken cancellationToken)
     {
-        if (!await IsGroupExistAsync(id, cancellationToken))
-        {
-            throw new Exception();
-        }
+        await EnsureGroupExistAsync(id, cancellationToken);
 
         await _repository.DeleteGroupAsync(id, cancellationToken);
     }
 
-    public Task<bool> IsGroupExistAsync(int id, CancellationToken cancellationToken)
+    public async Task EnsureGroupExistAsync(int id, CancellationToken cancellationToken)
     {
-        return _repository.IsGroupExistAsync(id, cancellationToken);
-    }
-
-    public Task<bool> IsGroupExistAsync(string name, CancellationToken cancellationToken)
-    {
-        return _repository.IsGroupExistAsync(name, cancellationToken);
+        if (!await _repository.IsGroupExistAsync(id, cancellationToken)) 
+        {
+            throw new Exception();
+        }
     }
 }

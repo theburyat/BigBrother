@@ -15,11 +15,27 @@ public class ScoreRepository : IScoreRepository
         _contextFactory = contextFactory;
     }
 
-    public async Task<IEnumerable<Score>> GetSessionsScoresAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 
-        return await context.Scores.AsNoTracking()
+        var entity = new ScoreEntity 
+        {
+            Rating = score.Rating,
+            SessionId = score.SessionId,
+            UserId = score.UserId
+        };
+        await context.Scores.AddAsync(entity, cancellationToken);
+
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<Score>> GetScoresBySessionAsync(int sessionId, CancellationToken cancellationToken)
+    {
+        await using var context = _contextFactory.GetContext();
+
+        return await context.Scores
+            .AsNoTracking()
             .Where(x => x.SessionId == sessionId)
             .Select(x => new Score 
             {
@@ -34,8 +50,11 @@ public class ScoreRepository : IScoreRepository
     {
         await using var context = _contextFactory.GetContext();
 
-        var entity = await context.Scores.AsNoTracking().FirstOrDefaultAsync(x => x.SessionId == sessionId && x.UserId == userId, cancellationToken);
-        if (entity == null) 
+        var entity = await context.Scores
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.SessionId == sessionId && x.UserId == userId, cancellationToken);
+        
+        if (entity == null)
         {
             return null;
         }
@@ -46,20 +65,5 @@ public class ScoreRepository : IScoreRepository
             UserId = entity.UserId,
             Rating = entity.Rating
         };
-    }
-
-    public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
-    {
-        await using var context = _contextFactory.GetContext();
-
-        var entity = new ScoreEntity 
-        {
-            Rating = score.Rating,
-            SessionId = score.SessionId,
-            UserId = score.UserId
-        };
-        await context.Scores.AddAsync(entity, cancellationToken);
-
-        await context.SaveChangesAsync(cancellationToken);
     }
 }

@@ -4,17 +4,18 @@ namespace BigBrother.Domain.Interfaces.Providers;
 
 public interface ISessionProvider
 {
-    Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken);
+    Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken);
+
+    Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken);
     
     Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken);
 
-    Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken);
-
     Task DeleteSessionAsync(int id, CancellationToken cancellationToken);
 
+    // TODO remake to status
     Task StartSessionAsync(int id, CancellationToken cancellationToken);
     
     Task StopSessionAsync(int id, CancellationToken cancellationToken);
     
-    Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken);
+    Task EnsureSessionExistAsync(int id, CancellationToken cancellationToken);
 }

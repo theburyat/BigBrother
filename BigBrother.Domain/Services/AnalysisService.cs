@@ -21,10 +21,7 @@ public sealed class AnalysisService : IAnalysisService
 
     public async Task RunAnalysisAsync(int sessionId, CancellationToken cancellationToken)
     {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
-        {
-            throw new Exception();
-        }
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
 
         var session = await _sessionProvider.GetSessionAsync(sessionId, cancellationToken);
         if (session.StartDate == null) 

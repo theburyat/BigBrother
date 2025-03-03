@@ -2,14 +2,13 @@ global using Action = BigBrother.Domain.Entities.Action;
 
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Interfaces.Providers;
-using BigBrother.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BigBrother.WebApp.Pages;
 
 public class ResultModel : PageModel
 {
-    private readonly ISessionProvider _sessionProvider;
     private readonly IScoreProvider _scoreProvider;
     private readonly IUserProvider _userProvider;
     private readonly IActionProvider _actionProvider;
@@ -21,9 +20,8 @@ public class ResultModel : PageModel
     public IEnumerable<Action>? Actions { get; set; }
 
 
-    public ResultModel(ISessionProvider sessionProvider, IScoreProvider scoreProvider, IUserProvider userProvider, IActionProvider actionProvider)
+    public ResultModel(IScoreProvider scoreProvider, IUserProvider userProvider, IActionProvider actionProvider)
     {
-        _sessionProvider = sessionProvider;
         _scoreProvider = scoreProvider;
         _userProvider = userProvider;
         _actionProvider = actionProvider;

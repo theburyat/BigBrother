@@ -44,6 +44,6 @@ public class GroupModel : PageModel
     private async Task GetPageInfoAsync(int id, CancellationToken cancellationToken)
     {
         Group = await _groupProvider.GetGroupAsync(id, cancellationToken);
-        Sessions = await _sessionProvider.GetGroupSessionsAsync(id, cancellationToken);
+        Sessions = await _sessionProvider.GetSessionsByGroupAsync(id, cancellationToken);
     }
 }

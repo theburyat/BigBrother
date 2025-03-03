@@ -4,11 +4,11 @@ namespace BigBrother.Domain.Interfaces.Repositories;
 
 public interface ISessionRepository
 {
-    Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken);
+    Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken);
+
+    Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken);
 
     Task<Session?> GetSessionAsync(int id, CancellationToken cancellationToken);
-
-    Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken);
 
     Task DeleteSessionAsync(int id, CancellationToken cancellationToken);
 

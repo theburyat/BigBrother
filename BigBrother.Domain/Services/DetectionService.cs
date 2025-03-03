@@ -35,11 +35,11 @@ public class DetectionService : IDetectionService
             tasks.Add(Task.Run(() =>
             {
                 var outlierScore = GetDistributionOutlierScore(
-                userActions.Actions.ToBoxCoxDistribution(),
-                boxCoxMeans,
-                boxCoxStandardDeviations,
-                weights,
-                maxActionsCount);
+                    userActions.Actions.ToBoxCoxDistribution(),
+                    boxCoxMeans,
+                    boxCoxStandardDeviations,
+                    weights,
+                    maxActionsCount);
 
                 result.TryAdd(userActions.UserId, outlierScore);
             }, cancellationToken));

@@ -17,39 +17,37 @@ public sealed class ScoreProvider : IScoreProvider
         _userProvider = userProvider;
     }
 
-    public async Task<IEnumerable<Score>> GetSessionsScoresAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
     {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
+        ArgumentNullException.ThrowIfNull(score);
+        
+        if (score.Rating < 0) 
         {
             throw new Exception();
         }
-        return await _repository.GetSessionsScoresAsync(sessionId, cancellationToken);
+
+        await _sessionProvider.EnsureSessionExistAsync(score.SessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(score.UserId, cancellationToken);
+        // to do check if user and session have equal group id
+        // to do check if already have score with same user id in session
+        
+        await _repository.AddScoreAsync(score, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Score>> GetScoresBySessionAsync(int sessionId, CancellationToken cancellationToken)
+    {
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+        
+        return await _repository.GetScoresBySessionAsync(sessionId, cancellationToken);
     }
 
     public async Task<Score> GetScoreAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(userId, cancellationToken);
+        // to do check if user and session have equal group id
+
         var score = await _repository.GetScoreAsync(sessionId, userId, cancellationToken);
         return score ?? throw new Exception();
-    }
-
-    public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
-    {
-        await ValidateScoreAsync(score, cancellationToken);
-        await _repository.AddScoreAsync(score, cancellationToken);
-    }
-
-    private async Task ValidateScoreAsync(Score score, CancellationToken cancellationToken) 
-    {
-        ArgumentNullException.ThrowIfNull(score);
-        
-        if (!await _sessionProvider.IsSessionExistAsync(score.SessionId, cancellationToken)) 
-        {
-            throw new Exception();
-        }
-        if (!await _userProvider.IsUserExistAsync(score.UserId, cancellationToken)) 
-        {
-            throw new Exception();
-        }
-        // TODO check if session group id = user group id
     }
 }

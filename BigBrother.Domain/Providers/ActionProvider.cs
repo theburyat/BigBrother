@@ -19,42 +19,28 @@ public sealed class ActionProvider : IActionProvider
 
     public async Task AddActionAsync(@Action action, CancellationToken cancellationToken)
     {
-        await ValidateActionAsync(action, cancellationToken);
+        ArgumentNullException.ThrowIfNull(action);
+
+        await _sessionProvider.EnsureSessionExistAsync(action.SessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(action.UserId, cancellationToken);
+        // to do check if user and session have same group id
+
         await _repository.AddActionAsync(action, cancellationToken);
     }
 
     public async Task<IEnumerable<UserActions>> GetSessionUsersActionsAsync(int sessionId, CancellationToken cancellationToken)
     {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
-        {
-            throw new Exception();
-        }
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+
         return await _repository.GetSessionUsersActionsAsync(sessionId, cancellationToken);
     }
 
     public async Task<IEnumerable<Action>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
-        await ValidateActionParametersAsync(sessionId, userId, cancellationToken);
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(userId, cancellationToken);
+        // to do check if user and session have same group id
+
         return await _repository.GetSessionUserActionsAsync(sessionId, userId, cancellationToken);
-    }
-
-    private async Task ValidateActionAsync(Action action, CancellationToken cancellationToken) 
-    {
-        ArgumentNullException.ThrowIfNull(action);
-        await ValidateActionParametersAsync(action.SessionId, action.UserId, cancellationToken);
-    }
-
-    private async Task ValidateActionParametersAsync(int sessionId, int userId, CancellationToken cancellationToken) 
-    {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) 
-        {
-            throw new Exception();
-        }
-        if (!await _userProvider.IsUserExistAsync(userId, cancellationToken)) 
-        {
-            throw new Exception();
-        }
-
-        // TODO check if session group id = user group id
     }
 }

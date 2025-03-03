@@ -15,10 +15,18 @@ public sealed class SessionProvider: ISessionProvider
         _groupProvider = groupProvider;
     }
 
-    public async Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken)
+    public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
     {
-        await ValidateGroupExistingAsync(groupId, cancellationToken);
-        return await _repository.GetGroupSessionsAsync(groupId, cancellationToken);
+        await _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
+        
+        return await _repository.CreateSessionAsync(groupId, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken)
+    {
+        await _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
+        
+        return await _repository.GetSessionsByGroupAsync(groupId, cancellationToken);
     }
 
     public async Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken)
@@ -28,27 +36,23 @@ public sealed class SessionProvider: ISessionProvider
         return session ?? throw new Exception();
     }
 
-    public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
-    {
-        await ValidateGroupExistingAsync(groupId, cancellationToken);
-        return await _repository.CreateSessionAsync(groupId, cancellationToken);
-    }
-
     public async Task DeleteSessionAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateSessionExistingAsync(id, cancellationToken);
+        await EnsureSessionExistAsync(id, cancellationToken);
+        
         await _repository.DeleteSessionAsync(id, cancellationToken);
     }
 
     public async Task StartSessionAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateSessionExistingAsync(id, cancellationToken);
+        await EnsureSessionExistAsync(id, cancellationToken);
+        
         await _repository.StartSessionAsync(id, cancellationToken);
     }
 
     public async Task StopSessionAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateSessionExistingAsync(id, cancellationToken);
+        await EnsureSessionExistAsync(id, cancellationToken);
         
         var session = await _repository.GetSessionAsync(id, cancellationToken);
         if (session!.StartDate == null) {
@@ -58,22 +62,9 @@ public sealed class SessionProvider: ISessionProvider
         await _repository.StopSessionAsync(id, cancellationToken);
     }
 
-    public Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken) 
+    public async Task EnsureSessionExistAsync(int id, CancellationToken cancellationToken)
     {
-        return _repository.IsSessionExistAsync(id, cancellationToken);
-    }
-
-    private async Task ValidateSessionExistingAsync(int id, CancellationToken cancellationToken)
-    {
-        if (!await IsSessionExistAsync(id, cancellationToken))
-        {
-            throw new Exception();
-        }
-    }
-
-    private async Task ValidateGroupExistingAsync(int groupId, CancellationToken cancellationToken) 
-    {
-        if (!await _groupProvider.IsGroupExistAsync(groupId, cancellationToken))
+        if (!await _repository.IsSessionExistAsync(id, cancellationToken))
         {
             throw new Exception();
         }

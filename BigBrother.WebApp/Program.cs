@@ -29,6 +29,8 @@ builder.Services.AddSingleton<IActionProvider, ActionProvider>();
 builder.Services.AddSingleton<IDetectionService, DetectionService>();
 builder.Services.AddSingleton<IAnalysisService, AnalysisService>();
 
+builder.Services.AddSingleton<Initializer>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

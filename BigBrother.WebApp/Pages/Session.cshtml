@@ -31,7 +31,7 @@
     }
     else if (Model.Scores != null)
     {
-        if (Model.Scores.Count() == 0) 
+        if (!Model.Scores.Any()) 
         {
             <form method="post">
                 <button type="submit" asp-page-handler="Analyze"
@@ -47,12 +47,13 @@
                 var user = Model.Users?.FirstOrDefault(x => x.Id == score.UserId);
                 if (user != null) 
                 {
+                    <h2>@Environment.NewLine</h2>
                     <li>
-                        <h4>@user.Name : @score.Rating</h4>
+                        <h5>@user.Name : @score.Rating</h5>
                     </li>
                     <form method="get">
                         <button type="submit" asp-page="Result"
-                                asp-route-userId="@score.UserId" asp-route-sessionId=@score.SessionId>
+                                asp-route-userId="@user.Id" asp-route-sessionId="@Model.Session.Id">
                             Go to result info
                         </button>
                     </form>
