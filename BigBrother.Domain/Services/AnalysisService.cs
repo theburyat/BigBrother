@@ -21,8 +21,6 @@ public sealed class AnalysisService : IAnalysisService
 
     public async Task RunAnalysisAsync(int sessionId, CancellationToken cancellationToken)
     {
-        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
-
         var session = await _sessionProvider.GetSessionAsync(sessionId, cancellationToken);
         if (session.StartDate == null) 
         {
@@ -46,9 +44,9 @@ public sealed class AnalysisService : IAnalysisService
         {
             var score = new Score 
             {
+                Rating = rating,
                 SessionId = sessionId,
-                UserId = userId,
-                Rating = rating
+                UserId = userId
             };
 
             tasks.Add(Task.Run(() => _scoreProvider.AddScoreAsync(score, cancellationToken), cancellationToken));
