@@ -30,7 +30,7 @@ public class ScoreRepository : IScoreRepository
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<Score>> GetScoresBySessionAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Score>> GetScoresInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 

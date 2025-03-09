@@ -33,7 +33,7 @@ public sealed class AnalysisService : IAnalysisService
             throw new Exception();
         }
 
-        var actions = await _actionProvider.GetSessionUsersActionsAsync(sessionId, cancellationToken);
+        var actions = await _actionProvider.GetUserIdeActionDistributionsInSessionAsync(sessionId, cancellationToken);
         if (actions.Count() == 0) 
         {
             throw new Exception();

@@ -27,7 +27,7 @@ public class SessionRepository : ISessionRepository
         return sessionEntity.Id;
     }
 
-     public async Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken)
+     public async Task<IEnumerable<Session>> GetSessionsInGroupAsync(int groupId, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 

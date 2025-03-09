@@ -22,11 +22,11 @@ public sealed class SessionProvider: ISessionProvider
         return await _repository.CreateSessionAsync(groupId, cancellationToken);
     }
 
-    public async Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Session>> GetSessionsInGroupAsync(int groupId, CancellationToken cancellationToken)
     {
         await _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
         
-        return await _repository.GetSessionsByGroupAsync(groupId, cancellationToken);
+        return await _repository.GetSessionsInGroupAsync(groupId, cancellationToken);
     }
 
     public async Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken)

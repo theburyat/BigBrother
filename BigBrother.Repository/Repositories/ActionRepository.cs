@@ -1,5 +1,3 @@
-global using Action = BigBrother.Domain.Entities.Action;
-
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Entities.Enums;
 using BigBrother.Domain.Interfaces.Repositories;
@@ -18,50 +16,52 @@ public class ActionRepository : IActionRepository
         _contextFactory = contextFactory;
     }
 
-    public async Task AddActionAsync(Action action, CancellationToken cancellationToken)
+    public async Task AddActionAsync(IdeAction action, CancellationToken cancellationToken)
     {
         using var context = _contextFactory.GetContext();
 
-        var entity = new ActionEntity 
+        var entity = new IdeActionEntity 
         {
             ActionType = action.ActionType,
+            Message = action.Message,
             DetectTime = action.DetectTime,
             SessionId = action.SessionId,
-            UserId = action.UserId,
-            Message = action.Message
+            UserId = action.UserId
         };
-        await context.Actions.AddAsync(entity, cancellationToken);
+        await context.IdeActions.AddAsync(entity, cancellationToken);
 
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<UserActions>> GetSessionUsersActionsAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<UserIdeActionsDistribution>> GetUserIdeActionDistributionsInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
-        var usersActions = new List<UserActions>();
+        var usersActions = new List<UserIdeActionsDistribution>();
 
         using var context = _contextFactory.GetContext();
 
-        var session = await context.Sessions.Include(x => x.Group).ThenInclude(x => x!.Users).AsNoTracking()
+        var session = await context.Sessions
+            .Include(x => x.Group)
+            .ThenInclude(x => x!.Users)
+            .AsNoTracking()
             .FirstAsync(x => x.Id == sessionId);
         var userIds = session.Group!.Users.Select(x => x.Id);
 
-        var actionTypes = Enum.GetValues<ActionType>();
+        var actionTypes = Enum.GetValues<IdeActionType>();
 
         foreach (var userId in userIds) 
         {
-            var actionCounts = new Dictionary<ActionType, int>();
+            var actionCounts = new Dictionary<IdeActionType, int>();
             foreach (var actionType in actionTypes) 
             {
-                var count = await context.Actions.AsNoTracking()
+                actionCounts[actionType] = await context.IdeActions
+                    .AsNoTracking()
                     .Where(x => x.SessionId == sessionId && x.UserId == userId && x.ActionType == actionType)
                     .CountAsync(cancellationToken);
-                
-                actionCounts[actionType] = count;
             }
-            var userActions = new UserActions 
+            var userActions = new UserIdeActionsDistribution 
             {
-                UserId = userId,
-                Actions = actionCounts
+                IdeActionsDistribution = actionCounts,
+                UserId = userId
             };
 
             usersActions.Add(userActions);
@@ -70,20 +70,21 @@ public class ActionRepository : IActionRepository
         return usersActions;
     }
 
-    public async Task<IEnumerable<Action>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<IdeAction>> GetIdeActionsInSessionByUserAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
         using var context = _contextFactory.GetContext();
 
-        return await context.Actions.AsNoTracking()
+        return await context.IdeActions
+            .AsNoTracking()
             .Where(x => x.SessionId == sessionId && x.UserId == userId)
             .OrderBy(x => x.DetectTime)
-            .Select(x => new Action {
+            .Select(x => new IdeAction {
                 Id = x.Id,
                 ActionType = x.ActionType,
+                Message = x.Message,
                 DetectTime = x.DetectTime,
                 SessionId = x.SessionId,
-                UserId = x.UserId,
-                Message = x.Message
+                UserId = x.UserId
             })
             .ToListAsync(cancellationToken);
     }

@@ -1,8 +1,5 @@
-global using Action = BigBrother.Domain.Entities.Action;
-
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Interfaces.Providers;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BigBrother.WebApp.Pages;
@@ -17,7 +14,7 @@ public class ResultModel : PageModel
 
     public new User? User { get; set; }
 
-    public IEnumerable<Action>? Actions { get; set; }
+    public IEnumerable<IdeAction>? IdeActions { get; set; }
 
 
     public ResultModel(IScoreProvider scoreProvider, IUserProvider userProvider, IActionProvider actionProvider)
@@ -38,6 +35,6 @@ public class ResultModel : PageModel
     {
         Score = await _scoreProvider.GetScoreAsync(sessionId, userId, cancellationToken);
         User = await _userProvider.GetUserAsync(userId, cancellationToken);
-        Actions = await _actionProvider.GetSessionUserActionsAsync(sessionId, userId, cancellationToken);
+        IdeActions = await _actionProvider.GetIdeActionsInSessionByUserAsync(sessionId, userId, cancellationToken);
     }
 }

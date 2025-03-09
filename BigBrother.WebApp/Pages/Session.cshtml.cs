@@ -61,9 +61,9 @@ public class SessionModel : PageModel
     private async Task GetPageInfoAsync(int id, CancellationToken cancellationToken)
     {
         Session = await _sessionProvider.GetSessionAsync(id, cancellationToken);
-        Users = await _userProvider.GetUsersBySessionAsync(id, cancellationToken);
+        Users = await _userProvider.GetUsersInSessionAsync(id, cancellationToken);
         
-        var scores = await _scoreProvider.GetScoresBySessionAsync(id, cancellationToken);
+        var scores = await _scoreProvider.GetScoresInSessionAsync(id, cancellationToken);
         Scores = scores.OrderBy(x => x.Rating);
     }
 }

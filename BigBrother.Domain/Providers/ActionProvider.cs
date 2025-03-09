@@ -17,30 +17,30 @@ public sealed class ActionProvider : IActionProvider
         _userProvider = userProvider;
     }
 
-    public async Task AddActionAsync(@Action action, CancellationToken cancellationToken)
+    public async Task AddIdeActionAsync(IdeAction ideAction, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(action);
+        ArgumentNullException.ThrowIfNull(ideAction);
 
-        await _sessionProvider.EnsureSessionExistAsync(action.SessionId, cancellationToken);
-        await _userProvider.EnsureUserExistAsync(action.UserId, cancellationToken);
+        await _sessionProvider.EnsureSessionExistAsync(ideAction.SessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(ideAction.UserId, cancellationToken);
         // to do check if user and session have same group id
 
-        await _repository.AddActionAsync(action, cancellationToken);
+        await _repository.AddActionAsync(ideAction, cancellationToken);
     }
 
-    public async Task<IEnumerable<UserActions>> GetSessionUsersActionsAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<UserIdeActionsDistribution>> GetUserIdeActionDistributionsInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
         await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
 
-        return await _repository.GetSessionUsersActionsAsync(sessionId, cancellationToken);
+        return await _repository.GetUserIdeActionDistributionsInSessionAsync(sessionId, cancellationToken);
     }
 
-    public async Task<IEnumerable<Action>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<IdeAction>> GetIdeActionsInSessionByUserAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
         await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
         await _userProvider.EnsureUserExistAsync(userId, cancellationToken);
         // to do check if user and session have same group id
 
-        return await _repository.GetSessionUserActionsAsync(sessionId, userId, cancellationToken);
+        return await _repository.GetIdeActionsInSessionByUserAsync(sessionId, userId, cancellationToken);
     }
 }

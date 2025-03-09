@@ -1,3 +1,4 @@
+using BigBrother.Domain.Entities;
 using BigBrother.Domain.Entities.Enums;
 using BigBrother.Domain.Interfaces.Providers;
 
@@ -27,7 +28,7 @@ public class Initializer
 
         var sessionId = await _sessionProvider.CreateSessionAsync(groupId, cancellationToken);
 
-        var actionTypes = Enum.GetValues<ActionType>();
+        var actionTypes = Enum.GetValues<IdeActionType>();
         for (var i = 0; i < 30; i++)
         {
             var userName = $"user{i}";
@@ -36,7 +37,7 @@ public class Initializer
             var tasks = new List<Task>();
             for (var j = 0; j < 100; j++)
             {
-                var action = new Action
+                var action = new IdeAction
                 {
                     ActionType = actionTypes[random.Next(actionTypes.Length)],
                     DetectTime = DateTime.UtcNow,
@@ -44,7 +45,7 @@ public class Initializer
                     UserId = userId,
                     Message = random.Next(10) < 2 ? "test message" : string.Empty 
                 };
-                tasks.Add(_actionProvider.AddActionAsync(action, cancellationToken));
+                tasks.Add(_actionProvider.AddIdeActionAsync(action, cancellationToken));
             }
             await Task.WhenAll(tasks);
         }

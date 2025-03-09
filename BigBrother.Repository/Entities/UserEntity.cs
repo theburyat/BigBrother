@@ -15,5 +15,5 @@ public sealed class UserEntity
     public GroupEntity? Group { get; set; }
 
     public List<ScoreEntity> Scores { get; set; } = new();
-    public List<ActionEntity> Actions { get; set; } = new();
+    public List<IdeActionEntity> Actions { get; set; } = new();
 }

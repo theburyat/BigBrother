@@ -34,11 +34,11 @@ public sealed class ScoreProvider : IScoreProvider
         await _repository.AddScoreAsync(score, cancellationToken);
     }
 
-    public async Task<IEnumerable<Score>> GetScoresBySessionAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<Score>> GetScoresInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
         await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
         
-        return await _repository.GetScoresBySessionAsync(sessionId, cancellationToken);
+        return await _repository.GetScoresInSessionAsync(sessionId, cancellationToken);
     }
 
     public async Task<Score> GetScoreAsync(int sessionId, int userId, CancellationToken cancellationToken)

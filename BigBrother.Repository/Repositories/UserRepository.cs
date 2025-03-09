@@ -31,7 +31,7 @@ public class UserRepository : IUserRepository
         return userEntity.Id;
     }
 
-    public async Task<IEnumerable<User>> GetUsersBySessionAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<User>> GetUsersInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
         await using var context = _contextFactory.GetContext();
 

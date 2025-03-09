@@ -6,7 +6,7 @@ public interface ISessionProvider
 {
     Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<Session>> GetSessionsByGroupAsync(int groupId, CancellationToken cancellationToken);
+    Task<IEnumerable<Session>> GetSessionsInGroupAsync(int groupId, CancellationToken cancellationToken);
     
     Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken);
 

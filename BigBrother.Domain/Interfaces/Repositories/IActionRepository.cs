@@ -4,9 +4,9 @@ namespace BigBrother.Domain.Interfaces.Repositories;
 
 public interface IActionRepository
 {
-    Task AddActionAsync(Action action, CancellationToken cancellationToken);
+    Task AddActionAsync(IdeAction action, CancellationToken cancellationToken);
 
-    Task<IEnumerable<UserActions>> GetSessionUsersActionsAsync(int sessionId, CancellationToken cancellationToken);
+    Task<IEnumerable<UserIdeActionsDistribution>> GetUserIdeActionDistributionsInSessionAsync(int sessionId, CancellationToken cancellationToken);
 
-    Task<IEnumerable<Action>> GetSessionUserActionsAsync(int sessionId, int userId, CancellationToken cancellationToken);
+    Task<IEnumerable<IdeAction>> GetIdeActionsInSessionByUserAsync(int sessionId, int userId, CancellationToken cancellationToken);
 }

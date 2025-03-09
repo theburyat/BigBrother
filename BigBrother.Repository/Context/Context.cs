@@ -13,7 +13,7 @@ public sealed class Context : DbContext
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<SessionEntity> Sessions { get; set; }
     public DbSet<ScoreEntity> Scores { get; set; }
-    public DbSet<ActionEntity> Actions { get; set; }
+    public DbSet<IdeActionEntity> IdeActions { get; set; }
 
     public Context(string connectionString)
     {

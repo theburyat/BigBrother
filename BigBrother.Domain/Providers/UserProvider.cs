@@ -28,11 +28,11 @@ public sealed class UserProvider : IUserProvider
         return await _repository.CreateUserAsync(name, groupId, cancellationToken);
     }
 
-    public async Task<IEnumerable<User>> GetUsersBySessionAsync(int sessionId, CancellationToken cancellationToken)
+    public async Task<IEnumerable<User>> GetUsersInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
         await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
 
-        return await _repository.GetUsersBySessionAsync(sessionId, cancellationToken);
+        return await _repository.GetUsersInSessionAsync(sessionId, cancellationToken);
     }
 
     public async Task<User> GetUserAsync(int id, CancellationToken cancellationToken)
