@@ -1,6 +1,22 @@
 @page "{id:int}"
 @model SessionModel
 
+@if (!string.IsNullOrEmpty(Model?.Error))
+{
+    <style>
+            .error-box {
+                color: white;
+                background-color: #ff0000;
+                margin: 0;
+                padding: 10px;
+                border-radius: 4px;
+            }
+        </style>
+
+    <div class="error-box">
+        Error: @Model?.Error
+    </div>
+}
 <h2>Session: @Model.Session?.Id</h2>
 @if (Model.Session != null) 
 {
@@ -49,7 +65,7 @@
                 {
                     <h2>@Environment.NewLine</h2>
                     <li>
-                        <h5>@user.Name : @score.Rating</h5>
+                        <h5>@user.Name : @Math.Round(score.Rating, 2)</h5>
                     </li>
                     <form method="get">
                         <button type="submit" asp-page="Result"

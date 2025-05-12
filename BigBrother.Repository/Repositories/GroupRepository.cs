@@ -45,16 +45,7 @@ public class GroupRepository : IGroupRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         
-        if (entity == null)
-        {
-            return null;
-        }
-
-        return new Group
-        {
-            Id = entity.Id,
-            Name = entity.Name
-        };
+        return entity == null ? null : new Group { Id = entity.Id, Name = entity.Name };
     }
 
     public async Task DeleteGroupAsync(int id, CancellationToken cancellationToken)
@@ -81,6 +72,6 @@ public class GroupRepository : IGroupRepository
         
         return await context.Groups
             .AsNoTracking()
-            .AnyAsync(x => string.Equals(x.Name, name, StringComparison.Ordinal), cancellationToken);
+            .AnyAsync(x => name == x.Name, cancellationToken);
     }
 }

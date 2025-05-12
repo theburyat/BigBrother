@@ -3,15 +3,18 @@ namespace BigBrother.Domain.Entities.Enums;
 public enum IdeActionType 
 {
     None,
-    Copy,
-    Cut,
+    Type,
     Delete,
     Enter,
-    Select,
+    Copy,
     Paste,
-    Type,
-    MoveCaret,
+    PasteFromExternal,
     CompleteCode,
+    Undo,
+    FormatCode,
+    FindUsages,
+    Build,
     Run,
-    Build
+    Commit,
+    Push
 }

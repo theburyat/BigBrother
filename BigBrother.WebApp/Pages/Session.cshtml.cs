@@ -1,12 +1,10 @@
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BigBrother.WebApp.Pages;
 
-public class SessionModel : PageModel
+public class SessionModel : BasePageModel
 {
     private readonly ISessionProvider _sessionProvider;
     private readonly IScoreProvider _scoreProvider;
@@ -14,9 +12,7 @@ public class SessionModel : PageModel
     private readonly IAnalysisService _analysisService;
 
     public Session? Session { get; set; }
-
     public IEnumerable<Score>? Scores { get; set; }
-
     public IEnumerable<User>? Users { get; set; }
 
     public SessionModel(ISessionProvider sessionProvider, IScoreProvider scoreProvider, IUserProvider userProvider, IAnalysisService analysisService)
@@ -30,32 +26,41 @@ public class SessionModel : PageModel
     public async Task OnGetAsync(int id)
     {
         var cancellationToken = HttpContext.RequestAborted;
-        
-        await GetPageInfoAsync(id, cancellationToken);
+
+        await SafeInvokeAsync(() => GetPageInfoAsync(id, cancellationToken));
     }
 
     public async Task OnPostStartAsync(int id) 
     {
         var cancellationToken = HttpContext.RequestAborted;
 
-        await _sessionProvider.StartSessionAsync(id, cancellationToken);
-        await GetPageInfoAsync(id, cancellationToken);
+        await SafeInvokeAsync(async () =>
+        {
+            await _sessionProvider.StartSessionAsync(id, cancellationToken);
+            await GetPageInfoAsync(id, cancellationToken); 
+        });
     }
 
     public async Task OnPostStopAsync(int id) 
     {
         var cancellationToken = HttpContext.RequestAborted;
 
-        await _sessionProvider.StopSessionAsync(id, cancellationToken);
-        await GetPageInfoAsync(id, cancellationToken);
+        await SafeInvokeAsync(async () =>
+        {
+            await _sessionProvider.StopSessionAsync(id, cancellationToken);
+            await GetPageInfoAsync(id, cancellationToken); 
+        });
     }
 
     public async Task OnPostAnalyzeAsync(int id) 
     {
         var cancellationToken = HttpContext.RequestAborted;
 
-        await _analysisService.RunAnalysisAsync(id, cancellationToken);
-        await GetPageInfoAsync(id, cancellationToken);
+        await SafeInvokeAsync(async () =>
+        {
+            await _analysisService.RunAnalysisAsync(id, cancellationToken);
+            await GetPageInfoAsync(id, cancellationToken);
+        });
     }
     
     private async Task GetPageInfoAsync(int id, CancellationToken cancellationToken)

@@ -43,7 +43,7 @@ public class ScoreRepository : IScoreRepository
                 SessionId = x.UserId,
                 UserId = x.UserId
             })
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Score?> GetScoreAsync(int sessionId, int userId, CancellationToken cancellationToken)
@@ -53,17 +53,14 @@ public class ScoreRepository : IScoreRepository
         var entity = await context.Scores
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.SessionId == sessionId && x.UserId == userId, cancellationToken);
-        
-        if (entity == null)
-        {
-            return null;
-        }
 
-        return new Score 
-        {
-            SessionId = entity.SessionId,
-            UserId = entity.UserId,
-            Rating = entity.Rating
-        };
+        return entity == null
+            ? null
+            : new Score
+            {
+                Rating = entity.Rating,
+                SessionId = entity.SessionId,
+                UserId = entity.UserId
+            };
     }
 }

@@ -60,18 +60,33 @@ public class UserRepository : IUserRepository
         var entity = await context.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        
-        if (entity == null) 
-        {
-            return null;
-        }
 
-        return new User 
-        {
-            Id = entity.Id,
-            Name = entity.Name,
-            GroupId = entity.GroupId
-        };
+        return entity == null
+            ? null
+            : new User
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                GroupId = entity.GroupId
+            };
+    }
+
+    public async Task<User?> GetUserAsync(string name, int groupId, CancellationToken cancellationToken)
+    {
+        await using var context = _contextFactory.GetContext();
+
+        var entity = await context.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Name == name && x.GroupId == groupId, cancellationToken);
+
+        return entity == null
+            ? null
+            : new User
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                GroupId = entity.GroupId
+            };
     }
 
     public async Task DeleteUserAsync(int id, CancellationToken cancellationToken)
@@ -80,7 +95,7 @@ public class UserRepository : IUserRepository
          
         await context.Users
             .Where(x => x.Id == id)
-            .ExecuteDeleteAsync();
+            .ExecuteDeleteAsync(cancellationToken);
     }
 
     public async Task<bool> IsUserExistAsync(int id, CancellationToken cancellationToken)
@@ -89,7 +104,7 @@ public class UserRepository : IUserRepository
         
         return await context.Users
             .AsNoTracking()
-            .AnyAsync(x => x.Id == id);
+            .AnyAsync(x => x.Id == id, cancellationToken);
     }
 
     public async Task<bool> IsUserExistAsync(string name, int groupId, CancellationToken cancellationToken)
@@ -98,6 +113,6 @@ public class UserRepository : IUserRepository
         
         return await context.Users
             .AsNoTracking()
-            .AnyAsync(x => string.Equals(x.Name, name, StringComparison.Ordinal) && x.GroupId == groupId, cancellationToken);
+            .AnyAsync(x => name == x.Name && x.GroupId == groupId, cancellationToken);
     }
 }

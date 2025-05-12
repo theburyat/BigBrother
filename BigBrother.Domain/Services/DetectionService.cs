@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Extensions;
 using BigBrother.Domain.Interfaces.Services;
 
@@ -12,9 +13,9 @@ public class DetectionService : IDetectionService
 
     public async Task<IDictionary<int, double>> DetectAnomaliesAsync(IReadOnlyCollection<UserIdeActionsDistribution> usersActions, CancellationToken cancellationToken)
     {
-        if (usersActions.Count() < 2) 
+        if (usersActions.Count < 3) 
         {
-            throw new Exception("few actions");
+            throw new BadRequestException(ErrorCode.NotEnoughUsersForAnalysis, "Analysis can be started only if there are at least three users in session");
         }
         
         var result = new ConcurrentDictionary<int, double>();

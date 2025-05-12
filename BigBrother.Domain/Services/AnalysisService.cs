@@ -1,4 +1,6 @@
 using BigBrother.Domain.Entities;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Services;
 
@@ -24,20 +26,15 @@ public sealed class AnalysisService : IAnalysisService
         var session = await _sessionProvider.GetSessionAsync(sessionId, cancellationToken);
         if (session.StartDate == null) 
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.SessionWasNotStarted, "Session was not started");
         }
         if (session.EndDate == null) 
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.SessionWasNotFinished, "Session was not finished");
         }
 
-        var actions = await _actionProvider.GetUserIdeActionDistributionsInSessionAsync(sessionId, cancellationToken);
-        if (actions.Count() == 0) 
-        {
-            throw new Exception();
-        }
-        
-        var analysisResult = await _detectionService.DetectAnomaliesAsync(actions.ToArray(), cancellationToken);
+        var actions = (await _actionProvider.GetUserIdeActionDistributionsInSessionAsync(sessionId, cancellationToken)).ToArray();
+        var analysisResult = await _detectionService.DetectAnomaliesAsync(actions, cancellationToken);
         
         var tasks = new List<Task>();
         foreach (var (userId, rating) in analysisResult) 

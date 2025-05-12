@@ -8,7 +8,7 @@ public sealed class IdeActionEntity
 {
     public Guid Id { get; set; }
 
-    public IdeActionType ActionType { get; set; }
+    public IdeActionType Type { get; set; }
 
     public string? Message { get; set; }
 

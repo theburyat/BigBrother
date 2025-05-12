@@ -3,16 +3,20 @@ using BigBrother.Domain.Interfaces.Repositories;
 using BigBrother.Domain.Interfaces.Services;
 using BigBrother.Domain.Providers;
 using BigBrother.Domain.Services;
+using BigBrother.Middlewares;
 using BigBrother.Repository.Context.Factory;
 using BigBrother.Repository.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddRazorPages();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
-var connectionString = "Host=localhost;Port=5432;Database=bb;Username=postgres;Password=postgres";
-builder.Services.AddSingleton<IContextFactory, ContextFactory>(_ => new ContextFactory(connectionString));
+builder.Services.AddRazorPages();
+builder.Services.AddControllers();
+
+var conf = new ConfigurationBuilder().SetBasePath(AppDomain.CurrentDomain.BaseDirectory).AddJsonFile("appsettings.json").Build();
+builder.Services.AddSingleton<IContextFactory, ContextFactory>(_ => new ContextFactory(conf.GetConnectionString("DbConnection") ?? string.Empty));
 
 builder.Services.AddSingleton<IGroupRepository, GroupRepository>();
 builder.Services.AddSingleton<ISessionRepository, SessionRepository>();
@@ -26,28 +30,26 @@ builder.Services.AddSingleton<IUserProvider, UserProvider>();
 builder.Services.AddSingleton<IScoreProvider, ScoreProvider>();
 builder.Services.AddSingleton<IActionProvider, ActionProvider>();
 
+builder.Services.AddSingleton<IConnectionService, ConnectionService>();
 builder.Services.AddSingleton<IDetectionService, DetectionService>();
 builder.Services.AddSingleton<IAnalysisService, AnalysisService>();
 
-builder.Services.AddSingleton<Initializer>();
+builder.Services.AddSingleton<InitializeService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
-}
+app.UseExceptionMiddleware();
+
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();

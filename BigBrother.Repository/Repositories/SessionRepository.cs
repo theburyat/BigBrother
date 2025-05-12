@@ -51,19 +51,16 @@ public class SessionRepository : ISessionRepository
         var session = await context.Sessions
             .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        
-        if (session == null) 
-        {
-            return null;
-        }
 
-        return new Session 
-        {
-            Id = session.Id,
-            GroupId = session.GroupId,
-            StartDate = session.StartDate,
-            EndDate = session.EndDate
-        };
+        return session == null
+            ? null
+            : new Session
+            {
+                Id = session.Id,
+                GroupId = session.GroupId,
+                StartDate = session.StartDate,
+                EndDate = session.EndDate
+            };
     }
 
     public async Task DeleteSessionAsync(int id, CancellationToken cancellationToken)

@@ -1,4 +1,6 @@
 using BigBrother.Domain.Entities;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Repositories;
 
@@ -23,13 +25,11 @@ public sealed class ScoreProvider : IScoreProvider
         
         if (score.Rating < 0) 
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.InvalidScore, "Score rating cannot be negative");
         }
 
         await _sessionProvider.EnsureSessionExistAsync(score.SessionId, cancellationToken);
         await _userProvider.EnsureUserExistAsync(score.UserId, cancellationToken);
-        // to do check if user and session have equal group id
-        // to do check if already have score with same user id in session
         
         await _repository.AddScoreAsync(score, cancellationToken);
     }
@@ -45,9 +45,8 @@ public sealed class ScoreProvider : IScoreProvider
     {
         await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
         await _userProvider.EnsureUserExistAsync(userId, cancellationToken);
-        // to do check if user and session have equal group id
 
-        var score = await _repository.GetScoreAsync(sessionId, userId, cancellationToken);
-        return score ?? throw new Exception();
+        return await _repository.GetScoreAsync(sessionId, userId, cancellationToken)
+            ?? throw new BadRequestException(ErrorCode.ScoreNotFound, $"Score of user id '{userId}' in session '{sessionId}' was not found");
     }
 }

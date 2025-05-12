@@ -18,11 +18,11 @@ public class ActionRepository : IActionRepository
 
     public async Task AddActionAsync(IdeAction action, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
         var entity = new IdeActionEntity 
         {
-            ActionType = action.ActionType,
+            Type = action.Type,
             Message = action.Message,
             DetectTime = action.DetectTime,
             SessionId = action.SessionId,
@@ -35,44 +35,43 @@ public class ActionRepository : IActionRepository
 
     public async Task<IEnumerable<UserIdeActionsDistribution>> GetUserIdeActionDistributionsInSessionAsync(int sessionId, CancellationToken cancellationToken)
     {
-        var usersActions = new List<UserIdeActionsDistribution>();
+        var result = new List<UserIdeActionsDistribution>();
+        
+        var actionTypes = Enum.GetValues<IdeActionType>();
 
-        using var context = _contextFactory.GetContext();
-
+        await using var context = _contextFactory.GetContext();
         var session = await context.Sessions
             .Include(x => x.Group)
             .ThenInclude(x => x!.Users)
             .AsNoTracking()
-            .FirstAsync(x => x.Id == sessionId);
-        var userIds = session.Group!.Users.Select(x => x.Id);
-
-        var actionTypes = Enum.GetValues<IdeActionType>();
-
-        foreach (var userId in userIds) 
+            .FirstAsync(x => x.Id == sessionId, cancellationToken);
+        
+        var usersInSession = session.Group!.Users.Select(x => x.Id);
+        foreach (var userId in usersInSession) 
         {
-            var actionCounts = new Dictionary<IdeActionType, int>();
+            var actionDistribution = new Dictionary<IdeActionType, int>();
             foreach (var actionType in actionTypes) 
             {
-                actionCounts[actionType] = await context.IdeActions
+                actionDistribution[actionType] = await context.IdeActions
                     .AsNoTracking()
-                    .Where(x => x.SessionId == sessionId && x.UserId == userId && x.ActionType == actionType)
+                    .Where(x => x.SessionId == sessionId && x.UserId == userId && x.Type == actionType)
                     .CountAsync(cancellationToken);
             }
             var userActions = new UserIdeActionsDistribution 
             {
-                IdeActionsDistribution = actionCounts,
+                IdeActionsDistribution = actionDistribution,
                 UserId = userId
             };
 
-            usersActions.Add(userActions);
+            result.Add(userActions);
         }
         
-        return usersActions;
+        return result;
     }
 
     public async Task<IEnumerable<IdeAction>> GetIdeActionsInSessionByUserAsync(int sessionId, int userId, CancellationToken cancellationToken)
     {
-        using var context = _contextFactory.GetContext();
+        await using var context = _contextFactory.GetContext();
 
         return await context.IdeActions
             .AsNoTracking()
@@ -80,7 +79,7 @@ public class ActionRepository : IActionRepository
             .OrderBy(x => x.DetectTime)
             .Select(x => new IdeAction {
                 Id = x.Id,
-                ActionType = x.ActionType,
+                Type = x.Type,
                 Message = x.Message,
                 DetectTime = x.DetectTime,
                 SessionId = x.SessionId,

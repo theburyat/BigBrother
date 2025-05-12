@@ -1,19 +1,16 @@
 using BigBrother.Domain.Entities;
 using BigBrother.Domain.Interfaces.Providers;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace BigBrother.WebApp.Pages;
 
-public class ResultModel : PageModel
+public class ResultModel : BasePageModel
 {
     private readonly IScoreProvider _scoreProvider;
     private readonly IUserProvider _userProvider;
     private readonly IActionProvider _actionProvider;
 
     public Score? Score { get; set; }
-
     public new User? User { get; set; }
-
     public IEnumerable<IdeAction>? IdeActions { get; set; }
 
 
@@ -27,8 +24,8 @@ public class ResultModel : PageModel
     public async Task OnGetAsync(int sessionId, int userId)
     {
         var cancellationToken = HttpContext.RequestAborted;
-        
-        await GetPageInfoAsync(sessionId, userId, cancellationToken);
+
+        await SafeInvokeAsync(() => GetPageInfoAsync(sessionId, userId, cancellationToken));
     }
     
     private async Task GetPageInfoAsync(int sessionId, int userId, CancellationToken cancellationToken)

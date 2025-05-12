@@ -1,8 +1,24 @@
 @page "session/{sessionId:int}/user/{userId:int}"
 @model ResultModel
 
-<h2>User: @Model.User?.Name</h2>
-<h2>Rating: @Model.Score?.Rating</h2>
+@if (!string.IsNullOrEmpty(Model?.Error))
+{
+    <style>
+            .error-box {
+                color: white;
+                background-color: #ff0000;
+                margin: 0;
+                padding: 10px;
+                border-radius: 4px;
+            }
+        </style>
+
+    <div class="error-box">
+        Error: @Model?.Error
+    </div>
+}
+<h2>User: @Model?.User?.Name</h2>
+<h2>Rating: @Math.Round(Model?.Score?.Rating ?? 0, 2)</h2>
 <h3>Actions:</h3>
 <h2>@Environment.NewLine</h2>
 <ul>
@@ -10,7 +26,7 @@
     {
         var messagePart = string.IsNullOrEmpty(action.Message) ? string.Empty : $"- {action.Message}";
         <li>
-            <h5>@action.DetectTime - @action.ActionType.ToString() @messagePart</h5>
+            <h5>@action.DetectTime - @action.Type.ToString() @messagePart</h5>
             <h5>@Environment.NewLine</h5>
         </li>
     }

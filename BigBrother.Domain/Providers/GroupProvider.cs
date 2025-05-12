@@ -1,4 +1,6 @@
 using BigBrother.Domain.Entities;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Repositories;
 
@@ -17,7 +19,7 @@ public sealed class GroupProvider: IGroupProvider
     {
         if (await _repository.IsGroupExistAsync(name, cancellationToken))
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.GroupAlreadyExists, $"Group with name '{name}' already exists");
         }
 
         return await _repository.CreateGroupAsync(name, cancellationToken);
@@ -30,9 +32,8 @@ public sealed class GroupProvider: IGroupProvider
 
     public async Task<Group> GetGroupAsync(int id, CancellationToken cancellationToken)
     {
-        var group = await _repository.GetGroupAsync(id, cancellationToken);
-
-        return group ?? throw new Exception();
+        return await _repository.GetGroupAsync(id, cancellationToken)
+            ?? throw new BadRequestException(ErrorCode.GroupNotFound, $"Group with id '{id}' was not found");
     }
 
     public async Task DeleteGroupAsync(int id, CancellationToken cancellationToken)
@@ -46,7 +47,7 @@ public sealed class GroupProvider: IGroupProvider
     {
         if (!await _repository.IsGroupExistAsync(id, cancellationToken)) 
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.GroupNotFound, $"Group with id '{id}' was not found");
         }
     }
 }

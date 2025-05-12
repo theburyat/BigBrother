@@ -1,4 +1,6 @@
 using BigBrother.Domain.Entities;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Repositories;
 
@@ -23,7 +25,7 @@ public sealed class UserProvider : IUserProvider
 
         if (await _repository.IsUserExistAsync(name, groupId, cancellationToken)) 
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.UserAlreadyExists, $"User with name '{name}' already exists in group with id '{groupId}'");
         }
         return await _repository.CreateUserAsync(name, groupId, cancellationToken);
     }
@@ -37,9 +39,16 @@ public sealed class UserProvider : IUserProvider
 
     public async Task<User> GetUserAsync(int id, CancellationToken cancellationToken)
     {
-        var user = await _repository.GetUserAsync(id, cancellationToken);
+        return await _repository.GetUserAsync(id, cancellationToken) 
+            ?? throw new BadRequestException(ErrorCode.UserNotFound, $"User with id '{id}' was not found");
+    }
+
+    public async Task<User> GetUserAsync(string name, int groupId, CancellationToken cancellationToken)
+    {
+        await _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
         
-        return user ?? throw new Exception();
+        return await _repository.GetUserAsync(name, groupId, cancellationToken) 
+            ?? throw new BadRequestException(ErrorCode.UserNotFound, $"User with name '{name}' was not found in group with id '{groupId}'");
     }
 
     public async Task DeleteUserAsync(int id, CancellationToken cancellationToken)
@@ -49,11 +58,18 @@ public sealed class UserProvider : IUserProvider
         await _repository.DeleteUserAsync(id, cancellationToken);
     }
 
+    public Task<bool> IsUserExistAsync(string name, int groupId, CancellationToken cancellationToken)
+    {
+        _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
+        
+        return _repository.IsUserExistAsync(name, groupId, cancellationToken);
+    }
+
     public async Task EnsureUserExistAsync(int id, CancellationToken cancellationToken)
     {
         if (!await _repository.IsUserExistAsync(id, cancellationToken)) 
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.UserNotFound, $"User with id '{id}' was not found");
         }
     }
 }

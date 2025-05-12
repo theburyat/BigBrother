@@ -6,7 +6,7 @@ public sealed class IdeAction
 {
     public Guid Id { get; set; }
 
-    public IdeActionType ActionType { get; set; }
+    public IdeActionType Type { get; set; }
 
     public string? Message { get; set; }
 

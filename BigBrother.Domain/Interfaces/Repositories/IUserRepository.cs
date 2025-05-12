@@ -9,6 +9,8 @@ public interface IUserRepository
     public Task<IEnumerable<User>> GetUsersInSessionAsync(int sessionId, CancellationToken cancellationToken);
 
     public Task<User?> GetUserAsync(int id, CancellationToken cancellationToken);
+    
+    public Task<User?> GetUserAsync(string name, int groupId, CancellationToken cancellationToken);
 
     public Task DeleteUserAsync(int id, CancellationToken cancellationToken);
 

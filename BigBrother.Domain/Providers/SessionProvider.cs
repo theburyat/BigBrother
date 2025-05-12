@@ -1,4 +1,6 @@
 using BigBrother.Domain.Entities;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Repositories;
 
@@ -31,9 +33,8 @@ public sealed class SessionProvider: ISessionProvider
 
     public async Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken)
     {
-        var session = await _repository.GetSessionAsync(id, cancellationToken);
-        
-        return session ?? throw new Exception();
+        return await _repository.GetSessionAsync(id, cancellationToken)
+            ?? throw new BadRequestException(ErrorCode.SessionNotFound, $"Session with id '{id}' was not found");
     }
 
     public async Task DeleteSessionAsync(int id, CancellationToken cancellationToken)
@@ -56,7 +57,7 @@ public sealed class SessionProvider: ISessionProvider
         
         var session = await _repository.GetSessionAsync(id, cancellationToken);
         if (session!.StartDate == null) {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.SessionWasNotStarted, $"Session with id '{id}' was not started");
         }
 
         await _repository.StopSessionAsync(id, cancellationToken);
@@ -66,7 +67,7 @@ public sealed class SessionProvider: ISessionProvider
     {
         if (!await _repository.IsSessionExistAsync(id, cancellationToken))
         {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.SessionNotFound, $"Session with id '{id}' was not found");
         }
     }
 }

@@ -1,4 +1,6 @@
 using BigBrother.Domain.Entities;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
 using BigBrother.Domain.Interfaces.Providers;
 using BigBrother.Domain.Interfaces.Repositories;
 
@@ -20,10 +22,14 @@ public sealed class ActionProvider : IActionProvider
     public async Task AddIdeActionAsync(IdeAction ideAction, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(ideAction);
-
-        await _sessionProvider.EnsureSessionExistAsync(ideAction.SessionId, cancellationToken);
+        
         await _userProvider.EnsureUserExistAsync(ideAction.UserId, cancellationToken);
-        // to do check if user and session have same group id
+        
+        var session = await _sessionProvider.GetSessionAsync(ideAction.SessionId, cancellationToken);
+        if (!session.IsRunning())
+        {
+            throw new BadRequestException(ErrorCode.SessionIsNotActive, $"Session {session.Id} is not active");
+        }
 
         await _repository.AddActionAsync(ideAction, cancellationToken);
     }
