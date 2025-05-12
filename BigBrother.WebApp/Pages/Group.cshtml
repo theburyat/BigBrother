@@ -1,0 +1,47 @@
+@page "{id:int}"
+@model GroupModel
+
+<h2>Group: @Model.Group?.Name</h2>
+<h2>Sessions:</h2>
+<ul>
+    @if (!string.IsNullOrEmpty(Model?.Error))
+    {
+        <style>
+            .error-box {
+                color: white;
+                background-color: #ff0000;
+                margin: 0;
+                padding: 10px;
+                border-radius: 4px;
+            }
+        </style>
+
+        <div class="error-box">
+            Error: @Model?.Error
+        </div>
+    }
+    @foreach (var session in Model?.Sessions ?? [])
+    {
+        <li>
+            <h4>@session.Id</h4>
+        </li>
+
+        <form method="get">
+            <button type="submit" asp-page="Session"
+                    asp-route-id="@session.Id">
+                Go to session info
+            </button>
+        </form>
+        <h4>@Environment.NewLine</h4>
+        <form method="post">
+            <button type="submit" asp-page-handler="Delete"
+                    asp-route-sessionId="@session.Id">
+                Delete session
+            </button>
+        </form>
+    }
+</ul>
+
+<form method="post">
+    <button type="submit" asp-page-handler="">Create new session</button>
+</form>

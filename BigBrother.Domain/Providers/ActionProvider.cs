@@ -1,10 +1,12 @@
 using BigBrother.Domain.Entities;
-using BigBrother.Domain.ProviderInterfaces;
-using BigBrother.Domain.RepositoryInterfaces;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
+using BigBrother.Domain.Interfaces.Providers;
+using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class ActionProvider : IActionProvider
+public sealed class ActionProvider : IActionProvider
 {
     private readonly IActionRepository _repository;
     private readonly ISessionProvider _sessionProvider;
@@ -17,31 +19,34 @@ public class ActionProvider : IActionProvider
         _userProvider = userProvider;
     }
 
-    public async Task AddActionAsync(IdeAction action, CancellationToken cancellationToken)
+    public async Task AddIdeActionAsync(IdeAction ideAction, CancellationToken cancellationToken)
     {
-        await ValidateActionAsync(action, cancellationToken);
-        await _repository.AddActionAsync(action, cancellationToken);
-    }
-
-    public async Task<IEnumerable<IdeAction>> GetUserSessionActionsAsync(int sessionId, int userId, CancellationToken cancellationToken)
-    {
-        await ValidateActionParametersAsync(sessionId, userId, cancellationToken);
-        return await _repository.GetUserSessionActionsAsync(sessionId, userId, cancellationToken);
-    }
-
-    private async Task ValidateActionAsync(IdeAction action, CancellationToken cancellationToken) {
-        ArgumentNullException.ThrowIfNull(action);
-        await ValidateActionParametersAsync(action.SessionId, action.UserId, cancellationToken);
-    }
-
-    private async Task ValidateActionParametersAsync(int sessionId, int userId, CancellationToken cancellationToken) {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) {
-            throw new Exception();
-        }
-        if (!await _userProvider.IsUserExistAsync(userId, cancellationToken)) {
-            throw new Exception();
+        ArgumentNullException.ThrowIfNull(ideAction);
+        
+        await _userProvider.EnsureUserExistAsync(ideAction.UserId, cancellationToken);
+        
+        var session = await _sessionProvider.GetSessionAsync(ideAction.SessionId, cancellationToken);
+        if (!session.IsRunning())
+        {
+            throw new BadRequestException(ErrorCode.SessionIsNotActive, $"Session {session.Id} is not active");
         }
 
-        // TODO check if session group id = user group id
+        await _repository.AddActionAsync(ideAction, cancellationToken);
+    }
+
+    public async Task<IEnumerable<UserIdeActionsDistribution>> GetUserIdeActionDistributionsInSessionAsync(int sessionId, CancellationToken cancellationToken)
+    {
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+
+        return await _repository.GetUserIdeActionDistributionsInSessionAsync(sessionId, cancellationToken);
+    }
+
+    public async Task<IEnumerable<IdeAction>> GetIdeActionsInSessionByUserAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    {
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(userId, cancellationToken);
+        // to do check if user and session have same group id
+
+        return await _repository.GetIdeActionsInSessionByUserAsync(sessionId, userId, cancellationToken);
     }
 }

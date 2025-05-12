@@ -1,10 +1,12 @@
 using BigBrother.Domain.Entities;
-using BigBrother.Domain.ProviderInterfaces;
-using BigBrother.Domain.RepositoryInterfaces;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
+using BigBrother.Domain.Interfaces.Providers;
+using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class SessionProvider: ISessionProvider
+public sealed class SessionProvider: ISessionProvider
 {
     private ISessionRepository _repository;
     private IGroupProvider _groupProvider;
@@ -15,52 +17,57 @@ public class SessionProvider: ISessionProvider
         _groupProvider = groupProvider;
     }
 
-    public Task<bool> IsSessionExistAsync(int id, CancellationToken cancellationToken) {
-        return _repository.IsSessionExistAsync(id, cancellationToken);
-    }
-
-    public async Task<IEnumerable<Session>> GetGroupSessionsAsync(int groupId, CancellationToken cancellationToken)
-    {
-        await ValidateGroupExistingAsync(groupId, cancellationToken);
-        return await _repository.GetGroupSessionsAsync(groupId, cancellationToken);
-    }
-    
     public async Task<int> CreateSessionAsync(int groupId, CancellationToken cancellationToken)
     {
-        await ValidateGroupExistingAsync(groupId, cancellationToken);
+        await _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
+        
         return await _repository.CreateSessionAsync(groupId, cancellationToken);
+    }
+
+    public async Task<IEnumerable<Session>> GetSessionsInGroupAsync(int groupId, CancellationToken cancellationToken)
+    {
+        await _groupProvider.EnsureGroupExistAsync(groupId, cancellationToken);
+        
+        return await _repository.GetSessionsInGroupAsync(groupId, cancellationToken);
+    }
+
+    public async Task<Session> GetSessionAsync(int id, CancellationToken cancellationToken)
+    {
+        return await _repository.GetSessionAsync(id, cancellationToken)
+            ?? throw new BadRequestException(ErrorCode.SessionNotFound, $"Session with id '{id}' was not found");
     }
 
     public async Task DeleteSessionAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateSessionExistingAsync(id, cancellationToken);
+        await EnsureSessionExistAsync(id, cancellationToken);
+        
         await _repository.DeleteSessionAsync(id, cancellationToken);
     }
 
     public async Task StartSessionAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateSessionExistingAsync(id, cancellationToken);
+        await EnsureSessionExistAsync(id, cancellationToken);
+        
         await _repository.StartSessionAsync(id, cancellationToken);
     }
 
     public async Task StopSessionAsync(int id, CancellationToken cancellationToken)
     {
-        await ValidateSessionExistingAsync(id, cancellationToken);
+        await EnsureSessionExistAsync(id, cancellationToken);
+        
+        var session = await _repository.GetSessionAsync(id, cancellationToken);
+        if (session!.StartDate == null) {
+            throw new BadRequestException(ErrorCode.SessionWasNotStarted, $"Session with id '{id}' was not started");
+        }
+
         await _repository.StopSessionAsync(id, cancellationToken);
     }
 
-    private async Task ValidateSessionExistingAsync(int id, CancellationToken cancellationToken)
+    public async Task EnsureSessionExistAsync(int id, CancellationToken cancellationToken)
     {
-        if (!await IsSessionExistAsync(id, cancellationToken))
+        if (!await _repository.IsSessionExistAsync(id, cancellationToken))
         {
-            throw new Exception();
-        }
-    }
-
-    private async Task ValidateGroupExistingAsync(int groupId, CancellationToken cancellationToken) {
-        if (!await _groupProvider.IsGroupExistAsync(groupId, cancellationToken))
-        {
-            throw new Exception();
+            throw new BadRequestException(ErrorCode.SessionNotFound, $"Session with id '{id}' was not found");
         }
     }
 }

@@ -1,0 +1,33 @@
+﻿services:
+  bigbrother.webapp:
+    container_name: bb.web
+    ports:
+      - '444:8080'
+    image: bigbrother.webapp
+    depends_on:
+      - bigbrother.db
+    build:
+      context: .
+      dockerfile: BigBrother.WebApp/Dockerfile
+    networks:
+      - bigbrother.network
+  bigbrother.db:
+    container_name: bb.db
+    ports:
+      - '5432:5432'
+    image: postgres:16
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - 'bigbrother.volume:/var/lib/postgresql/data'
+    networks:
+      - bigbrother.network
+
+volumes:
+  bigbrother.volume:
+
+networks:
+  bigbrother.network:
+    driver: bridge
+      
+

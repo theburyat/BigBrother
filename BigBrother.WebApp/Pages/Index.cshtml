@@ -1,0 +1,56 @@
+﻿@page
+@model IndexModel
+
+<h2>Groups:</h2>
+<ul>
+    @if (!string.IsNullOrEmpty(Model?.Error))
+    {
+        <style>
+            .error-box {
+                color: white;
+                background-color: #ff0000;
+                margin: 0;
+                padding: 10px;
+                border-radius: 4px;
+            }
+        </style>
+
+        <div class="error-box">
+            Error: @Model?.Error
+        </div>
+    }
+    @foreach (var group in Model?.Groups ?? [])
+    {
+        <li>
+            <h4>@group.Name</h4>
+        </li>
+        <form method="get">
+            <button type="submit" asp-page="Group"
+                    asp-route-id="@group.Id">
+                Go to group sessions
+            </button>
+        </form>
+        <h4>@Environment.NewLine</h4>
+        <form method="post">
+            <button type="submit" asp-page-handler="Delete"
+                    asp-route-id="@group.Id">
+                Delete group
+            </button>
+        </form>
+    }
+</ul>
+
+<form method="post">
+    <input type="text" name="name"/>
+    <button type="submit" asp-page-handler="">Create new group</button>
+</form>
+
+<h2>@Environment.NewLine</h2>
+@if (!Model?.Groups?.Any() ?? false)
+{
+    <form method="post">
+        <button type="submit" asp-page-handler="Initialize">
+            Initialize with test data
+        </button>
+    </form>
+}

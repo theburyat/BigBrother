@@ -1,10 +1,12 @@
 using BigBrother.Domain.Entities;
-using BigBrother.Domain.ProviderInterfaces;
-using BigBrother.Domain.RepositoryInterfaces;
+using BigBrother.Domain.Entities.Enums;
+using BigBrother.Domain.Entities.Exceptions;
+using BigBrother.Domain.Interfaces.Providers;
+using BigBrother.Domain.Interfaces.Repositories;
 
 namespace BigBrother.Domain.Providers;
 
-public class ScoreProvider : IScoreProvider
+public sealed class ScoreProvider : IScoreProvider
 {
     private readonly IScoreRepository _repository;
     private readonly ISessionProvider _sessionProvider;
@@ -17,29 +19,34 @@ public class ScoreProvider : IScoreProvider
         _userProvider = userProvider;
     }
 
-    public async Task<IEnumerable<Score>> GetSessionsScoresAsync(int sessionId, CancellationToken cancellationToken)
-    {
-        if (!await _sessionProvider.IsSessionExistAsync(sessionId, cancellationToken)) {
-            throw new Exception();
-        }
-        return await _repository.GetSessionsScoresAsync(sessionId, cancellationToken);
-    }
-
     public async Task AddScoreAsync(Score score, CancellationToken cancellationToken)
     {
-        await ValidateScoreAsync(score, cancellationToken);
+        ArgumentNullException.ThrowIfNull(score);
+        
+        if (score.Rating < 0) 
+        {
+            throw new BadRequestException(ErrorCode.InvalidScore, "Score rating cannot be negative");
+        }
+
+        await _sessionProvider.EnsureSessionExistAsync(score.SessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(score.UserId, cancellationToken);
+        
         await _repository.AddScoreAsync(score, cancellationToken);
     }
 
-    private async Task ValidateScoreAsync(Score score, CancellationToken cancellationToken) {
-        ArgumentNullException.ThrowIfNull(score);
+    public async Task<IEnumerable<Score>> GetScoresInSessionAsync(int sessionId, CancellationToken cancellationToken)
+    {
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
         
-        if (!await _sessionProvider.IsSessionExistAsync(score.SessionId, cancellationToken)) {
-            throw new Exception();
-        }
-        if (!await _userProvider.IsUserExistAsync(score.UserId, cancellationToken)) {
-            throw new Exception();
-        }
-        // TODO check if session group id = user group id
+        return await _repository.GetScoresInSessionAsync(sessionId, cancellationToken);
+    }
+
+    public async Task<Score> GetScoreAsync(int sessionId, int userId, CancellationToken cancellationToken)
+    {
+        await _sessionProvider.EnsureSessionExistAsync(sessionId, cancellationToken);
+        await _userProvider.EnsureUserExistAsync(userId, cancellationToken);
+
+        return await _repository.GetScoreAsync(sessionId, userId, cancellationToken)
+            ?? throw new BadRequestException(ErrorCode.ScoreNotFound, $"Score of user id '{userId}' in session '{sessionId}' was not found");
     }
 }
