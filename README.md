@@ -3,7 +3,6 @@
 ## How to run
 
 0. Prerequisites:
-   * sqlite
    * docker-compose
 
 
